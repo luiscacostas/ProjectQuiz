@@ -45,6 +45,7 @@ const printQuiz = (results, i) => {
         const buttonOption = document.createElement('BUTTON')
         buttonOption.textContent = opc;
         buttonOption.setAttribute('id', `option${index+1}`)
+        buttonOption.classList.add('btn_option_style')
         buttonOption.classList.add(`option${index+1}`)
         buttonOption.value = opc
         quiz.append(buttonOption)
@@ -105,4 +106,17 @@ getData()
 //animacion botones
 //Guardar en firebase y LocalStorage
 //Crear Usuarios Login y Resistro
+
+// btnLogin.addEventListener('click', ()=>{
+//     login.classList.add('showContainer')
+// })
+// btnRegister.addEventListener('click',()=>{
+//     registro.classList.add('showContainer')
+// })
+// btnCancelar.forEach((boton)=>{
+//     boton.addEventListener('click',()=>{
+//     registro.classList.remove('showContainer')
+//     login.classList.remove('showContainer')
+// })
+// })
 
