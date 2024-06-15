@@ -1,9 +1,11 @@
 body{
     margin: 0;
     padding: 0;
+    height: 100%;
     background-image: url(/assets/istockphoto-1148595387-612x612.jpg);
     background-repeat: no-repeat;
     background-size: cover;
+    
 }
 h2, h3{
     margin: 0;
@@ -12,10 +14,7 @@ h2, h3{
     max-width: 1200px;
     margin: 0 auto;
 }
-header{
-    background-color: rgb(22, 75, 145);
-    height: 50px;
-}
+
 header h2{
     color: white;
     font-size: 40px;
@@ -54,7 +53,7 @@ section {
     background-color: palevioletred;
 }
 #siguiente{
-    background-color: blue;
+    background-color: rgb(255, 0, 170);
 }
 #option1, #option2, #option3, #option4, #siguiente{
     color: white;
@@ -78,8 +77,16 @@ section {
     border-radius: 5px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    
+    justify-content: center;    
+}
+.styleGrafica{
+    height: 200px;
+    width: 200px;
+    background-color: rgba(55, 139, 62, 0.9);
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 200px;
 }
 .quiz h3{
     padding: 20px;
@@ -113,9 +120,72 @@ section {
 
 }
 .styleParrafoPregunta{
-    color: yellowgreen;
+    color: rgb(231, 232, 227);
     font-family: 'ArcadeClassic', sans-serif;
     font-size: 30px;
-    background: rgb(175, 56, 173);
+    background: rgb(255, 0, 170);
     border-radius: 10px;
+}
+/*Fuegos Artificiales*/
+.firework {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    aspect-ratio: 1;
+    background:
+    radial-gradient(circle, #ff0 0.2vmin, #0000 0) 50% 00%,
+    radial-gradient(circle, #ff0 0.3vmin, #0000 0) 00% 50%,
+    radial-gradient(circle, #ff0 0.5vmin, #0000 0) 50% 99%,
+    radial-gradient(circle, #ff0 0.2vmin, #0000 0) 99% 50%,
+    radial-gradient(circle, #ff0 0.3vmin, #0000 0) 80% 90%,
+    radial-gradient(circle, #ff0 0.5vmin, #0000 0) 95% 90%,
+    radial-gradient(circle, #ff0 0.5vmin, #0000 0) 10% 60%,
+    radial-gradient(circle, #ff0 0.2vmin, #0000 0) 31% 80%,
+    radial-gradient(circle, #ff0 0.3vmin, #0000 0) 80% 10%,
+    radial-gradient(circle, #ff0 0.2vmin, #0000 0) 90% 23%,
+    radial-gradient(circle, #ff0 0.3vmin, #0000 0) 45% 20%,
+    radial-gradient(circle, #ff0 0.5vmin, #0000 0) 13% 24%;
+    background-size: 0.5vmin 0.5vmin;
+    background-repeat: no-repeat;
+  }
+  @keyframes firework {
+    0% { 
+      transform: translate(-40%, 60vh);
+      width: 0.5vmin;
+      opacity: 1;
+    }
+    50% { 
+      width: 0.5vmin;
+      opacity: 1;
+    }
+    100% { 
+      width: 45vmin; 
+      opacity: 0; 
+    }
+  }
+  .firework {
+    animation: firework 2s infinite;
+  }
+  .firework,
+  .firework::before,
+  .firework::after {
+    content: "";
+  }
+  
+  .firework::before {
+    transform: translate(-50%, -50%) rotate(25deg) !important; 
+  }
+  
+  .firework::after {
+    transform: translate(-50%, -50%) rotate(-37deg) !important;
+  }
+/*Fuegos Artificiales*/
+
+/*Reloj*/
+#timer {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #ff0;  
 }

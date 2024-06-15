@@ -3,7 +3,7 @@ let options = [];
 let results = [];
 let index = 0;
 let respuestas = [];
-let fecha = new Date().toDateString(); //Fecha para puntuacion
+let fecha = new Date().toDateString();
 let btnHome = document.querySelector('#btnContenedor');
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
@@ -12,6 +12,8 @@ const score = {
     points: 0
 };
 let scores = [];
+let timeLeft = 10;
+let timer;
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -36,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ev.target.id === 'siguiente') {
                 index++;
                 printQuiz(results, index);
+                startTimer()
             }
         });
         getData();
@@ -87,34 +90,64 @@ const printQuiz = (results, i) => {
     buttonNext.setAttribute('id', 'siguiente');
     buttonNext.disabled = true;
     quiz.append(buttonNext);
-};
 
-const validateResponse = (value, button) => {
+    const divReloj = document.createElement('DIV')
+    const pReloj = document.createElement('P')
+    const timeSpan = document.createElement('SPAN')
+    divReloj.setAttribute('id', 'timer')
+    pReloj.textContent = `Tiempo Restante`
+    timeSpan.setAttribute('id', 'time')
+    timeSpan.textContent=10;
+    divReloj.append(pReloj, timeSpan)
+    quiz.append(divReloj)
+};
+window.onload = startTimer;
+
+
+function startTimer() {
+    timeLeft = 10;
+    timer = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            validateResponse(null, null, true);
+            disableButtons() 
+        } else {
+            timeLeft--;
+            document.getElementById('time').textContent = timeLeft;
+        }
+    }, 1000);
+}
+
+const validateResponse = (value, button, timeOut = false) => {
     const buttons = document.querySelectorAll('button');
-    if (value === results[index].correct_answer) {
+    if (!timeOut) {
+        if (value === results[index].correct_answer) {
         button.classList.add('styleOptionActive');
         respuestas.push(1);
-    } else {
+        } else {
         respuestas.push(0);
         button.classList.add('styleOptionInactive');
-       
-        const botonCorrecto = [...buttons].find((element) => element.value === results[index].correct_answer);
+        }
+    }else {
+        respuestas.push(0);
+    }
+    const botonCorrecto = [...buttons].find((element) => element.value === results[index].correct_answer);
         if (botonCorrecto) {
             botonCorrecto.classList.add('styleOptionActive');
         }
-    }
-    const botones = document.querySelectorAll('button');
-    botones.forEach(boton => {
-        boton.disabled = true;
-    });
+    disableButtons()
     document.getElementById('siguiente').disabled = false;
 };
+const disableButtons =()=> {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+}
 
 const printResults = (respuestas) => {
     quiz.innerHTML = '';
-
     const puntuacion = respuestas.reduce((acc, sum) => acc += sum, 0);
-
     const divPuntuacion = document.createElement('DIV')
     divPuntuacion.classList.add('divPuntuacion')
     const pResultado = document.createElement('P')
@@ -127,7 +160,7 @@ const printResults = (respuestas) => {
     score.points = puntuacion;
     scores.push(score);
     const divChartContainer = document.createElement('DIV')
-    divChartContainer.classList.add('divChartContainer','ct-chart', 'ct-perfect-fourth')
+    divChartContainer.classList.add('divChartContainer','ct-chart', 'ct-perfect-fourth', 'styleGrafica')
     const textoChart = document.createElement('P')
     textoChart.classList.add('textoChart')
     textoChart.textContent = 'Estas son tus puntuaciones'
@@ -156,17 +189,15 @@ const printResults = (respuestas) => {
     chart.on('draw', function(context) {
         if (context.type === 'line') {
             context.element.attr({
-                style: 'stroke: rgb(43, 119, 226); stroke-width: 8px;'
+                style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
             });
         }
         if (context.type === 'area') {
             context.element.attr({
-                style: 'fill: rgb(43, 119, 226);'
+                style: 'fill: rgb(255, 0, 170);'
             });
         }
     });
-
-    console.log(data.series)
 }
 
 const validateInicio = (valueOption) => {
@@ -186,20 +217,6 @@ const validateInicio = (valueOption) => {
 };
 
 //animacion tiempo
-//animacion botones
 //Guardar en firebase y LocalStorage
-//Crear Usuarios Login y Resistro
 
-// btnLogin.addEventListener('click', ()=>{
-//     login.classList.add('showContainer')
-// })
-// btnRegister.addEventListener('click',()=>{
-//     registro.classList.add('showContainer')
-// })
-// btnCancelar.forEach((boton)=>{
-//     boton.addEventListener('click',()=>{
-//     registro.classList.remove('showContainer')
-//     login.classList.remove('showContainer')
-// })
-// })
 
