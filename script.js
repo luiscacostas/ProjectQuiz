@@ -7,8 +7,11 @@ let fecha = new Date().toDateString(); //Fecha para puntuacion
 let btnHome = document.querySelector('#btnContenedor');
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
-
-
+const score = {
+    date: fecha,
+    points: 0
+};
+let scores = [];
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -109,18 +112,62 @@ const validateResponse = (value, button) => {
 
 const printResults = (respuestas) => {
     quiz.innerHTML = '';
-    const puntuacion = respuestas.reduce((acc, sum) => acc + sum, 0);
-    const divPuntuacion = document.createElement('DIV');
-    divPuntuacion.classList.add('divPuntuacion');
-    const pResultado = document.createElement('P');
-    const textoResultado = document.createElement('P');
-    textoResultado.classList.add('styleParrafoRestultado')
-    textoResultado.textContent = 'Este ha sido tu resultado';
-    pResultado.textContent = `${puntuacion} / 10`;
-    pResultado.classList.add('stylePuntuacion');
-    divPuntuacion.append(pResultado);
-    quiz.append(textoResultado, divPuntuacion);
-};
+
+    const puntuacion = respuestas.reduce((acc, sum) => acc += sum, 0);
+
+    const divPuntuacion = document.createElement('DIV')
+    divPuntuacion.classList.add('divPuntuacion')
+    const pResultado = document.createElement('P')
+    const textoResultado = document.createElement('P')
+    textoResultado.textContent = 'Este ha sido tu resultado'
+    pResultado.textContent = `${puntuacion} / 10`
+    pResultado.classList.add('stylePuntuacion')
+    divPuntuacion.append(pResultado)
+
+    score.points = puntuacion;
+    scores.push(score);
+    const divChartContainer = document.createElement('DIV')
+    divChartContainer.classList.add('divChartContainer','ct-chart', 'ct-perfect-fourth')
+    const textoChart = document.createElement('P')
+    textoChart.classList.add('textoChart')
+    textoChart.textContent = 'Estas son tus puntuaciones'
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer)
+
+    const data = {
+        labels: scores.map(resultado => resultado.date),
+        series: [[1,2,3,4,5,6,7,8,9,10]] //[scores.map(resultado => resultado.points)]
+    }
+    const options = {
+        showPoint: false,
+        showArea: true,
+        fullWidth: true,
+        axisX: {
+            showGrid: false
+        },
+        axisY: {
+            low: 0,
+            high: 10,
+            onlyInteger: true,
+            referenceValue: 5,
+            showGrid: false
+        }
+    }
+    const chart = new Chartist.Line('.ct-chart', data, options);
+    chart.on('draw', function(context) {
+        if (context.type === 'line') {
+            context.element.attr({
+                style: 'stroke: rgb(43, 119, 226); stroke-width: 8px;'
+            });
+        }
+        if (context.type === 'area') {
+            context.element.attr({
+                style: 'fill: rgb(43, 119, 226);'
+            });
+        }
+    });
+
+    console.log(data.series)
+}
 
 const validateInicio = (valueOption) => {
     const container1 = document.querySelector('#modal-container1');
