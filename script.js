@@ -5,6 +5,11 @@ let index = 0;
 let respuestas = [];
 let fecha = new Date().toDateString(); //Fecha para puntuacion
 let btnHome = document.querySelector('#btnContenedor');
+const btnLogin = document.querySelector('#login');
+const btnRegister = document.querySelector('#registro');
+
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     if (btnHome) {
@@ -118,10 +123,19 @@ const printResults = (respuestas) => {
 };
 
 const validateInicio = (valueOption) => {
+    const container1 = document.querySelector('#modal-container1');
+    const container2 = document.querySelector('#modal-container2');
+
     if (valueOption === 'play') {
         console.log('hola');
         window.location.href = 'questions.html';
-    }
+    } else if (valueOption== 'registro') {
+        console.log('registro')
+        container1.showModal()
+    } else if (valueOption== 'login') {
+        console.log('login')
+        container2.showModal();
+    } 
 };
 
 //animacion tiempo
