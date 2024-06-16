@@ -3,7 +3,11 @@ let options = [];
 let results = [];
 let index = 0;
 let respuestas = [];
-let fecha = new Date().toDateString();
+let fecha = new Date().toLocaleDateString('es-ES', {
+    year: '2-digit',
+    month: 'numeric',
+    day: 'numeric'
+  });
 let btnHome = document.querySelector('#btnContenedor');
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
@@ -11,7 +15,7 @@ const score = {
     date: fecha,
     points: 0
 };
-let scores = [];
+let scores = JSON.parse(localStorage.getItem("scores")) || [];
 let timeLeft = 10;
 let timer;
 
@@ -95,7 +99,7 @@ const printQuiz = (results, i) => {
     const timeSpan = document.createElement('P')
     divReloj.setAttribute('id', 'timer')
     timeSpan.setAttribute('id', 'time')
-    timeSpan.textContent=10;
+    timeSpan.textContent = 10;
     divReloj.append(timeSpan)
     quiz.append(divReloj)
 };
@@ -108,7 +112,7 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timer);
             validateResponse(null, null, true);
-            disableButtons() 
+            disableButtons()
         } else {
             timeLeft--;
             document.getElementById('time').textContent = timeLeft;
@@ -120,23 +124,23 @@ const validateResponse = (value, button, timeOut = false) => {
     const buttons = document.querySelectorAll('button');
     if (!timeOut) {
         if (value === results[index].correct_answer) {
-        button.classList.add('styleOptionActive');
-        respuestas.push(1);
+            button.classList.add('styleOptionActive');
+            respuestas.push(1);
         } else {
-        respuestas.push(0);
-        button.classList.add('styleOptionInactive');
+            respuestas.push(0);
+            button.classList.add('styleOptionInactive');
         }
-    }else {
+    } else {
         respuestas.push(0);
     }
     const botonCorrecto = [...buttons].find((element) => element.value === results[index].correct_answer);
-        if (botonCorrecto) {
-            botonCorrecto.classList.add('styleOptionActive');
-        }
+    if (botonCorrecto) {
+        botonCorrecto.classList.add('styleOptionActive');
+    }
     disableButtons()
     document.getElementById('siguiente').disabled = false;
 };
-const disableButtons =()=> {
+const disableButtons = () => {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
         button.disabled = true;
@@ -155,10 +159,16 @@ const printResults = (respuestas) => {
     pResultado.classList.add('stylePuntuacion')
     divPuntuacion.append(pResultado)
 
-    score.points = puntuacion;
-    scores.push(score);
+    const newScore = {
+        date: fecha,
+        points: puntuacion
+    };
+    scores.push(newScore);
+    localStorage.setItem("scores", JSON.stringify(scores));
+    const storedScores = JSON.parse(localStorage.getItem("scores"));
+
     const divChartContainer = document.createElement('DIV')
-    divChartContainer.classList.add('divChartContainer','ct-chart', 'ct-perfect-fourth', 'styleGrafica')
+    divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
     const textoChart = document.createElement('P')
     textoChart.classList.add('textoChart')
     textoChart.textContent = 'Estas son tus puntuaciones'
@@ -166,7 +176,7 @@ const printResults = (respuestas) => {
 
     const data = {
         labels: scores.map(resultado => resultado.date),
-        series: [[1,2,3,4,5,6,7,8,9,10]] //[scores.map(resultado => resultado.points)]
+        series: [scores.map(resultado => resultado.points)]
     }
     const options = {
         showPoint: false,
@@ -184,7 +194,7 @@ const printResults = (respuestas) => {
         }
     }
     const chart = new Chartist.Line('.ct-chart', data, options);
-    chart.on('draw', function(context) {
+    chart.on('draw', function (context) {
         if (context.type === 'line') {
             context.element.attr({
                 style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
@@ -206,19 +216,19 @@ const validateInicio = (valueOption) => {
     if (valueOption === 'play') {
         console.log('hola');
         window.location.href = 'questions.html';
-    } else if (valueOption== 'registro') {
+    } else if (valueOption == 'registro') {
         console.log('registro')
         container1.showModal()
-    } else if (valueOption== 'login') {
+    } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } 
-    
-    cancelarbtn.forEach((cancelar)=>{
-            cancelar.addEventListener('click', ()=>{
+    }
+
+    cancelarbtn.forEach((cancelar) => {
+        cancelar.addEventListener('click', () => {
             container1.close()
             container2.close()
-        })  
+        })
     })
 };
 
