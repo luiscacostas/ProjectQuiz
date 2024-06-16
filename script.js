@@ -166,21 +166,20 @@ const printResults = (respuestas) => {
     scores.push(newScore);
     localStorage.setItem("scores", JSON.stringify(scores));
     const storedScores = JSON.parse(localStorage.getItem("scores"));
-
     const divChartContainer = document.createElement('DIV')
     divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
     const textoChart = document.createElement('P')
     textoChart.classList.add('textoChart')
     textoChart.textContent = 'Estas son tus puntuaciones'
-    const logScores = document.createElement('DIV');
-    logScores.classList.add('styleGrafica');
+    const divScores = document.createElement('DIV');
+    divScores.classList.add('styleGrafica');
     storedScores.forEach(score => {
-        const logEntry = document.createElement('P');
-        logEntry.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
-        logScores.append(logEntry);
+        const logScores = document.createElement('P');
+        logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
+        divScores.append(logScores);
     });
 
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, logScores)
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores)
 
     const data = {
         labels: scores.map(resultado => resultado.date),
