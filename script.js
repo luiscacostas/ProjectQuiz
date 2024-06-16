@@ -1,3 +1,16 @@
+const firebaseConfig = {
+    apiKey: "AIzaSyAKHibe1airIWT3eiUCfL4WMWILNU9ZmIs",
+    authDomain: "proyecto-grupal-quiz.firebaseapp.com",
+    projectId: "proyecto-grupal-quiz",
+    storageBucket: "proyecto-grupal-quiz.appspot.com",
+    messagingSenderId: "596977327919",
+    appId: "1:596977327919:web:21c896093f84fd41274bda"
+};
+
+firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
+
+const db = firebase.firestore();// db representa mi BBDD //inicia Firestore
+
 let quiz = document.querySelector('.quiz');
 let options = [];
 let results = [];
@@ -38,6 +51,22 @@ document.addEventListener('DOMContentLoaded', () => {
         getData();
     }
 });
+
+document.addEventListener('submit', (event)=>{
+    event.preventDefault();
+    if (event.target.id == "form1"){
+        let email = event.target.elements.email.value;
+        let password = event.target.elements.pass.value;
+        signUpPlayer(email, password)
+    } else if (event.target.id == "form2"){
+        console.log(event.target.elements[0].value)
+        let email = event.target.elements[0].value;
+        console.log(event.target.elements[1].value)
+        let password = event.target.elements[1].value;
+        
+        loginPlayer(email,password)
+    }
+})
 
 const getData = async () => {
     try {
@@ -138,21 +167,71 @@ const validateInicio = (valueOption) => {
     } 
 };
 
+// AUTENTICACION
+
+const loginPlayer = async (email, password) => {
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // Signed in
+            let player = userCredential.user;
+            console.log(`se ha logado ${player.email} ID:${player.uid}`)
+            alert(`se ha logado ${player.email} ID:${player.uid}`)
+            console.log("PLAYER", player);
+            //meter la funcion de cerrar el popUp cuando esté
+        })
+        .catch((error) => {
+            let errorCode = error.code;
+            let errorMessage = error.message;
+            console.log(errorCode)
+            console.log(errorMessage)
+
+        });
+
+};
+
+const signOutPlayer = () => {
+    firebase.auth().signOut().then(() => {
+        console.log("Sale del sistema: " + user.email)
+    }).catch((error) => {
+        console.log("hubo un error: " + error);
+    });
+    location.reload()
+}
+
+const signUpPlayer = (email, password) => {
+    firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            let user = userCredential.user;
+            console.log(`se ha registrado ${user.email} ID:${user.uid}`)
+            alert(`se ha registrado ${user.email} con éxito`)
+            // ...
+            // Saves user in firestore
+            createPlayer({
+                id: user.uid,
+                email: user.email,
+                imagen: "default",
+            });
+        })
+        .catch((error) => {
+            console.log("Error en el sistema" + error.message, "Error: " + error.code);
+        });
+
+};
+
+const createPlayer = (player) => {
+    db.collection("player")
+        .doc(player.email)
+        .set(player)
+        .then(() => console.log(`usuario guardado correctamente con id: ${player.email}`))
+        .catch((error) => console.error("Error adding document: ", error));
+};
+
+
+
 //animacion tiempo
 //animacion botones
 //Guardar en firebase y LocalStorage
 //Crear Usuarios Login y Resistro
-
-// btnLogin.addEventListener('click', ()=>{
-//     login.classList.add('showContainer')
-// })
-// btnRegister.addEventListener('click',()=>{
-//     registro.classList.add('showContainer')
-// })
-// btnCancelar.forEach((boton)=>{
-//     boton.addEventListener('click',()=>{
-//     registro.classList.remove('showContainer')
-//     login.classList.remove('showContainer')
-// })
-// })
 
