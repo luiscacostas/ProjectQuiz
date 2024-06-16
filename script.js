@@ -92,13 +92,11 @@ const printQuiz = (results, i) => {
     quiz.append(buttonNext);
 
     const divReloj = document.createElement('DIV')
-    const pReloj = document.createElement('P')
-    const timeSpan = document.createElement('SPAN')
+    const timeSpan = document.createElement('P')
     divReloj.setAttribute('id', 'timer')
-    pReloj.textContent = `Tiempo Restante`
     timeSpan.setAttribute('id', 'time')
     timeSpan.textContent=10;
-    divReloj.append(pReloj, timeSpan)
+    divReloj.append(timeSpan)
     quiz.append(divReloj)
 };
 window.onload = startTimer;
@@ -203,6 +201,7 @@ const printResults = (respuestas) => {
 const validateInicio = (valueOption) => {
     const container1 = document.querySelector('#modal-container1');
     const container2 = document.querySelector('#modal-container2');
+    const cancelarbtn = document.querySelectorAll('.cancelar')
 
     if (valueOption === 'play') {
         console.log('hola');
@@ -214,6 +213,13 @@ const validateInicio = (valueOption) => {
         console.log('login')
         container2.showModal();
     } 
+    
+    cancelarbtn.forEach((cancelar)=>{
+            cancelar.addEventListener('click', ()=>{
+            container1.close()
+            container2.close()
+        })  
+    })
 };
 
 //animacion tiempo

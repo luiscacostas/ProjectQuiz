@@ -24,43 +24,44 @@
             <button class="btnInicio" value="ranking">Ranking</button>
         </div>
     </main>
+    <section class="contenedorFormularios">
+        <dialog id="modal-container1" class="modal">
+                <h3>Formulario de Registro</h3>
+                <form id="form1" action="#" method="POST">
+                    <div>
+                        <label for="email">Email:</label><br>
+                        <input type="email" id="email" name="email" placeholder="Introduce email..."
+                            autocomplete="on"><br>
+                        <label for="pass">Password:</label><br>
+                        <input type="password" id="pass" name="pass" placeholder="Introduce password..."
+                            autocomplete="on"><br>
+                        <input type="submit" value="Enviar" class="enviar">
+                    </div>
+                </form>
+                <input type="submit" value="x" id="cancelar" class="cancelar">
+        </dialog>
+
+        <dialog id="modal-container2" class="modal">
+                <h3>Formulario de Login</h3>
+                <form id="form2" action="#" method="POST">
+                    <div>
+                        <label for="email2">Email:</label><br>
+                        <input type="email" id="email2" name="email2" placeholder="Introduce email..."
+                            autocomplete="on"><br>
+                        <label for="pass3">Password:</label><br>
+                        <input type="password" id="pass3" name="pass3" placeholder="Introduce password..."
+                            autocomplete="on"><br>
+                        <input type="submit" value="Enviar" class="enviar">
+                    </div>
+                </form>
+                <input type="submit" value="x" id="cancelar" class="cancelar">
+        </dialog>
+
+    </section>
+
     
     <script src="script.js"></script>
 </body>
 
 </html>
-        <section class="contenedorFormularios">
-            <dialog id="modal-container1" class="modal">
-                    <h3>Formulario de Registro</h3>
-                    <form id="form1" action="#" method="POST">
-                        <div>
-                            <label for="email">Email:</label><br>
-                            <input type="email" id="email" name="email" placeholder="Introduce email..."
-                                autocomplete="on"><br>
-                            <label for="pass">Password:</label><br>
-                            <input type="password" id="pass" name="pass" placeholder="Introduce password..."
-                                autocomplete="on"><br>
-                            <input type="submit" value="Enviar" class="enviar">
-                        </div>
-                    </form>
-                    <input type="submit" value="Cancelar" id="cancelar">
-            </dialog>
-
-            <dialog id="modal-container2" class="modal">
-                    <h3>Formulario de Login</h3>
-                    <form id="form2" action="#" method="POST">
-                        <div>
-                            <label for="email2">Email:</label><br>
-                            <input type="email" id="email2" name="email2" placeholder="Introduce email..."
-                                autocomplete="on"><br>
-                            <label for="pass3">Password:</label><br>
-                            <input type="password" id="pass3" name="pass3" placeholder="Introduce password..."
-                                autocomplete="on"><br>
-                            <input type="submit" value="Enviar" class="enviar">
-                        </div>
-                    </form>
-                    <input type="submit" value="Cancelar" id="cancelar">
-            </dialog>
-
-        </section>
- 
+        
