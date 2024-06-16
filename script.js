@@ -7,7 +7,7 @@ let fecha = new Date().toLocaleDateString('es-ES', {
     year: '2-digit',
     month: 'numeric',
     day: 'numeric'
-  });
+});
 let btnHome = document.querySelector('#btnContenedor');
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
@@ -172,7 +172,15 @@ const printResults = (respuestas) => {
     const textoChart = document.createElement('P')
     textoChart.classList.add('textoChart')
     textoChart.textContent = 'Estas son tus puntuaciones'
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer)
+    const logScores = document.createElement('DIV');
+    logScores.classList.add('styleGrafica');
+    storedScores.forEach(score => {
+        const logEntry = document.createElement('P');
+        logEntry.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
+        logScores.append(logEntry);
+    });
+
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, logScores)
 
     const data = {
         labels: scores.map(resultado => resultado.date),
@@ -181,9 +189,14 @@ const printResults = (respuestas) => {
     const options = {
         showPoint: false,
         showArea: true,
-        fullWidth: true,
+        fullWidth: false,
+        chartPadding: {
+            top: 40,
+            right: 20,
+            bottom: 40
+        },
         axisX: {
-            showGrid: false
+            showGrid: true
         },
         axisY: {
             low: 0,
@@ -195,6 +208,11 @@ const printResults = (respuestas) => {
     }
     const chart = new Chartist.Line('.ct-chart', data, options);
     chart.on('draw', function (context) {
+        if (context.type === 'point') {
+            context.element.attr({
+                style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
+            });
+        }
         if (context.type === 'line') {
             context.element.attr({
                 style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
@@ -204,6 +222,24 @@ const printResults = (respuestas) => {
             context.element.attr({
                 style: 'fill: rgb(255, 0, 170);'
             });
+        }
+    });
+    chart.on('created', function () {
+        const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
+        axisXLabels.forEach(function (label) {
+            label.style.transform = 'rotate(-45deg) translateX(-40px)';
+            label.style.textAnchor = 'end';
+            label.style.transformOrigin = '0 50%';
+        });
+        const linePath = document.querySelector('.ct-series .ct-line');
+        if (linePath) {
+            const length = linePath.getTotalLength();
+            linePath.style.transition = 'none';
+            linePath.style.strokeDasharray = length + ' ' + length;
+            linePath.style.strokeDashoffset = length;
+            linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
+            linePath.style.transition = 'stroke-dashoffset 2s ease-out';
+            linePath.style.strokeDashoffset = '0';
         }
     });
 }
