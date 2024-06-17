@@ -137,43 +137,55 @@ html, body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 0.5vmin;
+  width: 10px; 
   aspect-ratio: 1;
-  background:
-  radial-gradient(circle, yellow 0.5vmin, #0000 0) 50% 0%;
-  background-size: 0.5vmin 0.5vmin;
+  background: radial-gradient(circle, yellow 10px, #0000 0) 50% 0%; 
+  background-size: 10px 10px; 
   background-repeat: no-repeat;
 }
+
 @keyframes firework {
   0% { 
     transform: translate(-50%, 60vh);
-    width: 0.5vmin;
+    width: 10px; 
     opacity: 1;
   }
   50% { 
-    width: 0.5vmin;
+    width: 10px; 
     opacity: 1;
   }
   100% { 
-    width: 45vmin; 
-    opacity: 0; 
+    width: 900px; 
+    opacity: 0;
   }
 }
+
 .firework {
   animation: firework 2s infinite;
 }
+
 .firework,
 .firework::before,
 .firework::after {
   content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.firework::before,
+.firework::after {
+  background: inherit;
+  top: 0;
+  left: 0;
 }
 
 .firework::before {
-  transform: translate(-50%, -50%) rotate(25deg) !important; 
+  transform: translate(-50%, -50%) rotate(25deg); 
 }
 
 .firework::after {
-  transform: translate(-50%, -50%) rotate(-37deg) !important;
+  transform: translate(-50%, -50%) rotate(-37deg);
 }
 
 .modal .enviar{

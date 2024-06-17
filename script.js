@@ -15,7 +15,6 @@ let scores = [];
 let timeLeft = 10;
 let timer;
 
-
 document.addEventListener('DOMContentLoaded', () => {
     if (btnHome) {
         btnHome.addEventListener('click', (ev) => {
@@ -59,7 +58,7 @@ const getData = async () => {
     } catch (error) {
         console.error(error);
     }
-};
+}
 
 const printQuiz = (results, i) => {
     if (index === 10) {
@@ -68,7 +67,7 @@ const printQuiz = (results, i) => {
     }
 
     quiz.innerHTML = '';
-    options = [...results[i].incorrect_answers, results[i].correct_answer];
+    options = shuffle([...results[i].incorrect_answers, results[i].correct_answer]);
     const pregunta = document.createElement('H3');
     pregunta.classList.add('styleParrafoPregunta')
     pregunta.textContent = results[i].question;
@@ -98,13 +97,19 @@ const printQuiz = (results, i) => {
     timeSpan.textContent=10;
     divReloj.append(timeSpan)
     quiz.append(divReloj)
+
 };
+
 window.onload = startTimer;
 
+const shuffle = (array) => array.sort(() => Math.random() - 0.5);
 
 function startTimer() {
     timeLeft = 10;
+    clearInterval(timer);
     timer = setInterval(() => {
+        const timerElement = document.getElementById('time');
+        if (!timerElement) return;
         if (timeLeft <= 0) {
             clearInterval(timer);
             validateResponse(null, null, true);
@@ -122,9 +127,11 @@ const validateResponse = (value, button, timeOut = false) => {
         if (value === results[index].correct_answer) {
         button.classList.add('styleOptionActive');
         respuestas.push(1);
+        clearInterval(timer);
         } else {
         respuestas.push(0);
         button.classList.add('styleOptionInactive');
+        clearInterval(timer);
         }
     }else {
         respuestas.push(0);
@@ -135,6 +142,7 @@ const validateResponse = (value, button, timeOut = false) => {
         }
     disableButtons()
     document.getElementById('siguiente').disabled = false;
+    
 };
 const disableButtons =()=> {
     const buttons = document.querySelectorAll('button');
@@ -150,7 +158,8 @@ const printResults = (respuestas) => {
     divPuntuacion.classList.add('divPuntuacion')
     const pResultado = document.createElement('P')
     const textoResultado = document.createElement('P')
-    textoResultado.textContent = 'Este ha sido tu resultado'
+    textoResultado.textContent = 'Tu resultado'
+    textoResultado.classList.add('textoChart')
     pResultado.textContent = `${puntuacion} / 10`
     pResultado.classList.add('stylePuntuacion')
     divPuntuacion.append(pResultado)
@@ -161,8 +170,18 @@ const printResults = (respuestas) => {
     divChartContainer.classList.add('divChartContainer','ct-chart', 'ct-perfect-fourth', 'styleGrafica')
     const textoChart = document.createElement('P')
     textoChart.classList.add('textoChart')
-    textoChart.textContent = 'Estas son tus puntuaciones'
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer)
+    textoChart.textContent = 'Tus puntuaciones'
+    const btnReturnPlay = document.createElement('BUTTON')
+    btnReturnPlay.textContent='Volver a Jugar'
+    btnReturnPlay.classList.add('btnReturnPlay')
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer,btnReturnPlay)
+
+    btnReturnPlay.addEventListener('click', () => {
+        index = 0;
+        respuestas = [];
+        score.points = 0;
+        printQuiz(results, index);
+    });
 
     const data = {
         labels: scores.map(resultado => resultado.date),
@@ -195,7 +214,7 @@ const printResults = (respuestas) => {
                 style: 'fill: rgb(255, 0, 170);'
             });
         }
-    });
+    }); 
 }
 
 const validateInicio = (valueOption) => {
@@ -213,7 +232,6 @@ const validateInicio = (valueOption) => {
         console.log('login')
         container2.showModal();
     } 
-    
     cancelarbtn.forEach((cancelar)=>{
             cancelar.addEventListener('click', ()=>{
             container1.close()
@@ -221,8 +239,5 @@ const validateInicio = (valueOption) => {
         })  
     })
 };
-
-//animacion tiempo
-//Guardar en firebase y LocalStorage
 
 
