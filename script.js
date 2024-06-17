@@ -263,6 +263,68 @@ const validateInicio = (valueOption) => {
     } 
 };
 
+// AUTENTICACION
+
+const loginPlayer = async (email, password) => {
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // Signed in
+            let player = userCredential.user;
+            console.log(`se ha logado ${player.email} ID:${player.uid}`)
+            alert(`se ha logado ${player.email} ID:${player.uid}`)
+            console.log("PLAYER", player);
+            //meter la funcion de cerrar el popUp cuando esté
+        })
+        .catch((error) => {
+            let errorCode = error.code;
+            let errorMessage = error.message;
+            console.log(errorCode)
+            console.log(errorMessage)
+
+        });
+
+};
+
+const signOutPlayer = () => {
+    firebase.auth().signOut().then(() => {
+        console.log("Sale del sistema: " + user.email)
+    }).catch((error) => {
+        console.log("hubo un error: " + error);
+    });
+    location.reload()
+}
+
+const signUpPlayer = (email, password) => {
+    firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            let user = userCredential.user;
+            console.log(`se ha registrado ${user.email} ID:${user.uid}`)
+            alert(`se ha registrado ${user.email} con éxito`)
+            // ...
+            // Saves user in firestore
+            createPlayer({
+                id: user.uid,
+                email: user.email,
+                imagen: "default",
+            });
+        })
+        .catch((error) => {
+            console.log("Error en el sistema" + error.message, "Error: " + error.code);
+        });
+
+};
+
+const createPlayer = (player) => {
+    db.collection("player")
+        .doc(player.email)
+        .set(player)
+        .then(() => console.log(`usuario guardado correctamente con id: ${player.email}`))
+        .catch((error) => console.error("Error adding document: ", error));
+};
+
+
 //animacion tiempo
 //animacion botones
 //Guardar en firebase y LocalStorage
