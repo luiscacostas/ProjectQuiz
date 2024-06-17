@@ -12,6 +12,7 @@ firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
 const db = firebase.firestore();// db representa mi BBDD //inicia Firestore
 
 let quiz = document.querySelector('.quiz');
+let resultsPage = document.querySelector('.results');
 let options = [];
 let results = [];
 let index = 0;
@@ -59,6 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
         getData();
+    }
+
+    if(resultsPage){
+
     }
 });
 
@@ -294,6 +299,10 @@ const printResults = (respuestas) => {
     });
 }
 
+const printResultsPage = () => {
+
+};
+
 const validateInicio = (valueOption) => {
     const container1 = document.querySelector('#modal-container1');
     const container2 = document.querySelector('#modal-container2');
@@ -308,7 +317,10 @@ const validateInicio = (valueOption) => {
     } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } 
+    } else if (valueOption =='resultados') {
+        console.log('resultados');
+        window.location.href = 'results.html';
+    }
 
     cancelarbtn.forEach((btn)=>{
         btn.addEventListener('click',()=>{
@@ -326,15 +338,28 @@ const loginPlayer = async (email, password) => {
             // Signed in
             let player = userCredential.user;
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
-            alert(`se ha logado ${player.email} ID:${player.uid}`)
+            alert(`se ha logado ${player.email}`)
             console.log("PLAYER", player);
             //meter la funcion de cerrar el popUp cuando esté
+            //
         })
         .catch((error) => {
             let errorCode = error.code;
             let errorMessage = error.message;
-            console.log(errorCode)
-            console.log(errorMessage)
+            console.log("Error en el sistema: " + errorMessage, "Error: " + errorCode);
+            if (errorCode === 'auth/wrong-password') {
+                alert('La contraseña es incorrecta.');
+            } else if (errorCode === 'auth/user-not-found') {
+                alert('No se encontró una cuenta con este correo.');
+            } else if (errorCode === 'auth/invalid-email') {
+                alert('El correo electrónico no es válido.');
+            } else if (errorCode === 'auth/user-disabled') {
+                alert('La cuenta ha sido deshabilitada.');
+            } else if (errorCode === 'auth/internal-error') {
+                alert('Correo y/o contraseña no válidos.');
+            } else {
+                alert('Error al iniciar sesión: ' + errorCode);
+            }
 
         });
 
@@ -366,7 +391,20 @@ const signUpPlayer = (email, password) => {
             });
         })
         .catch((error) => {
-            console.log("Error en el sistema" + error.message, "Error: " + error.code);
+            console.log("Error en el sistema: " + error.message, "Error: " + error.code);
+            if (errorCode === 'auth/wrong-password') {
+                alert('La contraseña es incorrecta.');
+            } else if (errorCode === 'auth/user-not-found') {
+                alert('No se encontró una cuenta con este correo.');
+            } else if (errorCode === 'auth/invalid-email') {
+                alert('El correo electrónico no es válido.');
+            } else if (errorCode === 'auth/user-disabled') {
+                alert('La cuenta ha sido deshabilitada.');
+            } else if (errorCode === 'auth/internal-error') {
+                alert('Correo y/o contraseña no válidos.');
+            } else {
+                alert('Error al iniciar sesión: ' + errorCode);
+            }
         });
 
 };
@@ -376,7 +414,7 @@ const createPlayer = (player) => {
         .doc(player.email)
         .set(player)
         .then(() => console.log(`usuario guardado correctamente con id: ${player.email}`))
-        .catch((error) => console.error("Error adding document: ", error));
+        .catch((error) => console.log("Error en el sistema: " + error.message, "Error: " + error.code));
 };
 
 
@@ -397,4 +435,12 @@ const createPlayer = (player) => {
 //     login.classList.remove('showContainer')
 // })
 // })
+
+
+//alerts de contraseña no valida en sign up player y login
+//loginplayer sin alert con id, solo email
+//else if valueOption == resultados en funcion validateInicio, cambio del value del boton resultados en html 
+//results.html con estilos de style y fuentes arcade linkeados
+//añadido enlace a api de chartist
+//añadida cancion del mario en results
 
