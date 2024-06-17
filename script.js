@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 printQuiz(results, index);
                 startTimer()
             }
+
         });
         getData();
     }
@@ -92,6 +93,8 @@ const getData = async () => {
 const printQuiz = (results, i) => {
     if (index === 10) {
         printResults(respuestas);
+        const botonActivo = document.querySelector('.styleOptionActive')
+        botonActivo.classList.remove('styleOptionActive')
         return;
     }
 
@@ -261,6 +264,13 @@ const validateInicio = (valueOption) => {
         console.log('login')
         container2.showModal();
     } 
+
+    cancelarbtn.forEach((btn)=>{
+        btn.addEventListener('click',()=>{
+            container1.close()
+            container2.close()
+    })    //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+})
 };
 
 // AUTENTICACION
