@@ -16,7 +16,11 @@ let options = [];
 let results = [];
 let index = 0;
 let respuestas = [];
-let fecha = new Date().toDateString();
+let fecha = new Date().toLocaleDateString('es-ES', {
+    year: '2-digit',
+    month: 'numeric',
+    day: 'numeric'
+});
 let btnHome = document.querySelector('#btnContenedor');
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
@@ -24,7 +28,7 @@ const score = {
     date: fecha,
     points: 0
 };
-let scores = [];
+let scores = JSON.parse(localStorage.getItem("scores")) || [];
 let timeLeft = 10;
 let timer;
 
@@ -126,7 +130,7 @@ const printQuiz = (results, i) => {
     const timeSpan = document.createElement('P')
     divReloj.setAttribute('id', 'timer')
     timeSpan.setAttribute('id', 'time')
-    timeSpan.textContent=10;
+    timeSpan.textContent = 10;
     divReloj.append(timeSpan)
     quiz.append(divReloj)
 
@@ -145,7 +149,7 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timer);
             validateResponse(null, null, true);
-            disableButtons() 
+            disableButtons()
         } else {
             timeLeft--;
             document.getElementById('time').textContent = timeLeft;
@@ -157,26 +161,26 @@ const validateResponse = (value, button, timeOut = false) => {
     const buttons = document.querySelectorAll('button');
     if (!timeOut) {
         if (value === results[index].correct_answer) {
-        button.classList.add('styleOptionActive');
-        respuestas.push(1);
+            button.classList.add('styleOptionActive');
+            respuestas.push(1);
         clearInterval(timer);
         } else {
-        respuestas.push(0);
-        button.classList.add('styleOptionInactive');
+            respuestas.push(0);
+            button.classList.add('styleOptionInactive');
         clearInterval(timer);
         }
-    }else {
+    } else {
         respuestas.push(0);
     }
     const botonCorrecto = [...buttons].find((element) => element.value === results[index].correct_answer);
-        if (botonCorrecto) {
-            botonCorrecto.classList.add('styleOptionActive');
-        }
+    if (botonCorrecto) {
+        botonCorrecto.classList.add('styleOptionActive');
+    }
     disableButtons()
     document.getElementById('siguiente').disabled = false;
     
 };
-const disableButtons =()=> {
+const disableButtons = () => {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
         button.disabled = true;
@@ -196,17 +200,30 @@ const printResults = (respuestas) => {
     pResultado.classList.add('stylePuntuacion')
     divPuntuacion.append(pResultado)
 
-    score.points = puntuacion;
-    scores.push(score);
+    const newScore = {
+        date: fecha,
+        points: puntuacion
+    };
+    scores.push(newScore);
+    localStorage.setItem("scores", JSON.stringify(scores));
+    const storedScores = JSON.parse(localStorage.getItem("scores"));
     const divChartContainer = document.createElement('DIV')
-    divChartContainer.classList.add('divChartContainer','ct-chart', 'ct-perfect-fourth', 'styleGrafica')
+    divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
     const textoChart = document.createElement('P')
     textoChart.classList.add('textoChart')
     textoChart.textContent = 'Tus puntuaciones'
     const btnReturnPlay = document.createElement('BUTTON')
     btnReturnPlay.textContent='Volver a Jugar'
     btnReturnPlay.classList.add('btnReturnPlay')
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer,btnReturnPlay)
+    const divScores = document.createElement('DIV');
+    divScores.classList.add('styleGrafica');
+    storedScores.forEach(score => {
+        const logScores = document.createElement('P');
+        logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
+        divScores.append(logScores);
+    });
+
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores,btnReturnPlay)
 
     btnReturnPlay.addEventListener('click', () => {
         index = 0;
@@ -217,14 +234,19 @@ const printResults = (respuestas) => {
 
     const data = {
         labels: scores.map(resultado => resultado.date),
-        series: [[1,2,3,4,5,6,7,8,9,10]] //[scores.map(resultado => resultado.points)]
+        series: [scores.map(resultado => resultado.points)]
     }
     const options = {
         showPoint: false,
         showArea: true,
-        fullWidth: true,
+        fullWidth: false,
+        chartPadding: {
+            top: 40,
+            right: 20,
+            bottom: 40
+        },
         axisX: {
-            showGrid: false
+            showGrid: true
         },
         axisY: {
             low: 0,
@@ -235,7 +257,12 @@ const printResults = (respuestas) => {
         }
     }
     const chart = new Chartist.Line('.ct-chart', data, options);
-    chart.on('draw', function(context) {
+    chart.on('draw', function (context) {
+        if (context.type === 'point') {
+            context.element.attr({
+                style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
+            });
+        }
         if (context.type === 'line') {
             context.element.attr({
                 style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
@@ -247,6 +274,24 @@ const printResults = (respuestas) => {
             });
         }
     }); 
+    chart.on('created', function () {
+        const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
+        axisXLabels.forEach(function (label) {
+            label.style.transform = 'rotate(-45deg) translateX(-40px)';
+            label.style.textAnchor = 'end';
+            label.style.transformOrigin = '0 50%';
+        });
+        const linePath = document.querySelector('.ct-series .ct-line');
+        if (linePath) {
+            const length = linePath.getTotalLength();
+            linePath.style.transition = 'none';
+            linePath.style.strokeDasharray = length + ' ' + length;
+            linePath.style.strokeDashoffset = length;
+            linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
+            linePath.style.transition = 'stroke-dashoffset 2s ease-out';
+            linePath.style.strokeDashoffset = '0';
+        }
+    });
 }
 
 const validateInicio = (valueOption) => {
@@ -257,10 +302,10 @@ const validateInicio = (valueOption) => {
     if (valueOption === 'play') {
         console.log('hola');
         window.location.href = 'questions.html';
-    } else if (valueOption== 'registro') {
+    } else if (valueOption == 'registro') {
         console.log('registro')
         container1.showModal()
-    } else if (valueOption== 'login') {
+    } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
     } 
