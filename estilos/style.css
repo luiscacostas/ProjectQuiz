@@ -4,7 +4,7 @@ html, body{
     height: 100%  
 }
 body{
-    background-image: url(/assets/istockphoto-1148595387-612x612.jpg);
+    background-image: url(../assets/istockphoto-1148595387-612x612.jpg);
     background-repeat: no-repeat;
     background-size: cover;
 }
