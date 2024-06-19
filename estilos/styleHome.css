@@ -6,7 +6,7 @@ html, body {
   
   body {
     font-family: 'ArcadeClassic', sans-serif; 
-    background-image: url(../assets/istockphoto-1148595387-612x612.jpg);
+    background-image: url("../assets/istockphoto-1148595387-612x612.jpg");
     background-repeat: no-repeat;
     background-size: cover;
     display: flex;
