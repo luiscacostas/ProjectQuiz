@@ -31,6 +31,8 @@ const score = {
 let scores = JSON.parse(localStorage.getItem("scores")) || [];
 let timeLeft = 10;
 let timer;
+const container1 = document.querySelector('#modal-container1');
+const container2 = document.querySelector('#modal-container2');
 
 document.addEventListener('DOMContentLoaded', () => {
     if (btnHome) {
@@ -55,8 +57,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 index++;
                 printQuiz(results, index);
                 startTimer()
-            }
-
+            } /*else if (ev.target.classList.contains('cancelar')) {
+                console.log("entro en cancelar")
+                if (container1.open === true){
+                    container1.close();
+                } else if (container2 === false){
+                    container2.close();
+                }
+            }*/
         });
         getData();
     }
@@ -75,7 +83,7 @@ document.addEventListener('submit', (event)=>{
         let password = event.target.elements[1].value;
         
         loginPlayer(email,password)
-    }
+    } 
 })
 
 const getData = async () => {
@@ -295,8 +303,6 @@ const printResults = (respuestas) => {
 }
 
 const validateInicio = (valueOption) => {
-    const container1 = document.querySelector('#modal-container1');
-    const container2 = document.querySelector('#modal-container2');
     const cancelarbtn = document.querySelectorAll('.cancelar')
 
     if (valueOption === 'play') {
@@ -310,11 +316,11 @@ const validateInicio = (valueOption) => {
         container2.showModal();
     } 
 
-    cancelarbtn.forEach((btn)=>{
+     cancelarbtn.forEach((btn)=>{
         btn.addEventListener('click',()=>{
             container1.close()
             container2.close()
-    })    //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    })     //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 })
 };
 
@@ -323,11 +329,13 @@ const validateInicio = (valueOption) => {
 const loginPlayer = async (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
+            const container2 = document.querySelector('#modal-container2');
             // Signed in
             let player = userCredential.user;
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
+            if (container2.open == true) {
+                container2.close()}
             alert(`se ha logado ${player.email} ID:${player.uid}`)
-            console.log("PLAYER", player);
             //meter la funcion de cerrar el popUp cuando esté
         })
         .catch((error) => {
@@ -350,14 +358,17 @@ const signOutPlayer = () => {
 }
 
 const signUpPlayer = (email, password) => {
+    //const container1 = document.querySelector('#modal-container1');
+    let email1 = email;
+    let password1 = password;
     firebase
         .auth()
-        .createUserWithEmailAndPassword(email, password)
+        .createUserWithEmailAndPassword(email1, password1)
         .then(async (userCredential) => {
             let user = userCredential.user;
-            console.log(`se ha registrado ${user.email} ID:${user.uid}`)
-            alert(`se ha registrado ${user.email} con éxito`)
-            await loginPlayer(user.email, user.password)
+            console.log(`se ha registrado ${email1} ID:${user.uid}`)
+            alert(`se ha registrado ${email1} con éxito`)
+            await loginPlayer(email1, password1)
             // ...
             // Saves user in firestore
             createPlayer({
@@ -365,6 +376,7 @@ const signUpPlayer = (email, password) => {
                 email: user.email,
                 imagen: "default",
             });
+            container1.close()
         })
         .catch((error) => {
             console.log("Error en el sistema" + error.message, "Error: " + error.code);
