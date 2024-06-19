@@ -304,6 +304,7 @@ const printResults = (respuestas) => {
 }
 
 const validateInicio = (valueOption) => {
+    const popUpOpciones = document.querySelector('#options')
     const cancelarbtn = document.querySelectorAll('.cancelar')
 
     if (valueOption === 'play') {
@@ -315,12 +316,18 @@ const validateInicio = (valueOption) => {
     } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } 
+    } else if(valueOption == 'Opciones'){
+        popUpOpciones.showModal();
+    } else if(valueOption == 'salir del perfil'){
+        console.log("dentro del boton salir")
+        signOutPlayer()
+    }
 
      cancelarbtn.forEach((btn)=>{
         btn.addEventListener('click',()=>{
             container1.close()
             container2.close()
+            popUpOpciones.close()
     })  
 })
 };
@@ -335,11 +342,11 @@ const loginPlayer = async (email, password) => {
             let player = userCredential.user;
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
             if (container2.open == true) {
-                container2.close()}
+                container2.close()}//cierra el popUp si esta abierto
             alert(`se ha logado ${player.email} ID:${player.uid}`)
             console.log("PLAYER", player);
-            
-            //meter la funcion de cerrar el popUp cuando esté
+            //cambia el menú y muetra la imagen de usuario
+            menuPlayer();
         })
         .catch((error) => {
             let errorCode = error.code;
@@ -377,7 +384,7 @@ const signUpPlayer = (email, password) => {
             createPlayer({
                 id: user.uid,
                 email: user.email,
-                imagen: "default",
+                imagen: "gs://proyecto-grupal-quiz.appspot.com/images/yGWbojjZ0ucnertBphwkNtCShcg2.jpg",
             });
             container1.close()
         })
@@ -393,6 +400,24 @@ const createPlayer = (player) => {
         .set(player)
         .then(() => console.log(`usuario guardado correctamente con id: ${player.email}`))
         .catch((error) => console.error("Error adding document: ", error));
+};
+
+const menuPlayer = ()=>{
+    const btnContenedor = document.querySelector('#btnContenedor');
+    console.log(btnContenedor);
+    const btnLogin = document.querySelector('#btnLogin');
+    console.log(btnLogin);
+    const btnRegistro = document.querySelector('#btnRegistro');
+    console.log(btnRegistro);
+    btnLogin.remove();
+    btnRegistro.remove();
+
+    const btnOpciones = document.createElement('button');
+    btnOpciones.classList.add('btnInicio');
+    btnOpciones.value = 'Opciones';
+    btnOpciones.textContent = 'Opciones de usuario';
+
+    btnContenedor.append(btnOpciones)
 };
 
 const uploadFile = ()=> {
@@ -426,6 +451,5 @@ const displayImage = (url)=> {
     imagenPerfil.innerHTML = '';
     imagenPerfil.append(img);
     divImagenFav.style.display= 'none'
-    
 }
 
