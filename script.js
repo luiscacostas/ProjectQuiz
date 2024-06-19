@@ -98,13 +98,12 @@ const getData = async () => {
 }
 
 const printQuiz = (results, i) => {
+    startTimer()
     if (index === 10) {
         printResults(respuestas);
-        const botonActivo = document.querySelector('.styleOptionActive')
-        botonActivo.classList.remove('styleOptionActive')
         return;
     }
-
+    
     quiz.innerHTML = '';
     options = shuffle([...results[i].incorrect_answers, results[i].correct_answer]);
     const pregunta = document.createElement('H3');
@@ -153,6 +152,7 @@ function startTimer() {
             clearInterval(timer);
             validateResponse(null, null, true);
             disableButtons()
+            document.getElementById('time').textContent = 'Tiempo Agotado';
         } else {
             timeLeft--;
             document.getElementById('time').textContent = timeLeft;
@@ -226,13 +226,13 @@ const printResults = (respuestas) => {
         divScores.append(logScores);
     });
 
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores,btnReturnPlay)
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer,btnReturnPlay)
 
     btnReturnPlay.addEventListener('click', () => {
         index = 0;
         respuestas = [];
         score.points = 0;
-        printQuiz(results, index);
+        getData();
     });
 
     const data = {
@@ -317,7 +317,7 @@ const validateInicio = (valueOption) => {
         btn.addEventListener('click',()=>{
             container1.close()
             container2.close()
-    })    //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    })  
 })
 };
 
@@ -415,21 +415,4 @@ const displayImage = (url)=> {
     divImagenFav.style.display= 'none'
     
 }
-//animacion tiempo
-//animacion botones
-//Guardar en firebase y LocalStorage
-//Crear Usuarios Login y Resistro
-
-// btnLogin.addEventListener('click', ()=>{
-//     login.classList.add('showContainer')
-// })
-// btnRegister.addEventListener('click',()=>{
-//     registro.classList.add('showContainer')
-// })
-// btnCancelar.forEach((boton)=>{
-//     boton.addEventListener('click',()=>{
-//     registro.classList.remove('showContainer')
-//     login.classList.remove('showContainer')
-// })
-// })
 
