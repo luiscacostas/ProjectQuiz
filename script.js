@@ -10,6 +10,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
 
 const db = firebase.firestore();// db representa mi BBDD //inicia Firestore
+//let user = db.collection.('player').doc(user.email);
 
 let quiz = document.querySelector('.quiz');
 let resultsPage = document.querySelector('.results');
@@ -62,24 +63,30 @@ document.addEventListener('DOMContentLoaded', () => {
         getData();
     }
 
-    if(resultsPage){
-
+    if (resultsPage) {
+        resultsPage.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            if (ev.target.tagName === 'BUTTON') {
+                const valueOption = ev.target.value;
+                printResultsPage();
+            }
+        });
     }
 });
 
-document.addEventListener('submit', (event)=>{
+document.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (event.target.id == "form1"){
+    if (event.target.id == "form1") {
         let email = event.target.elements.email.value;
         let password = event.target.elements.pass.value;
         signUpPlayer(email, password)
-    } else if (event.target.id == "form2"){
+    } else if (event.target.id == "form2") {
         console.log(event.target.elements[0].value)
         let email = event.target.elements[0].value;
         console.log(event.target.elements[1].value)
         let password = event.target.elements[1].value;
-        
-        loginPlayer(email,password)
+
+        loginPlayer(email, password)
     }
 })
 
@@ -168,11 +175,11 @@ const validateResponse = (value, button, timeOut = false) => {
         if (value === results[index].correct_answer) {
             button.classList.add('styleOptionActive');
             respuestas.push(1);
-        clearInterval(timer);
+            clearInterval(timer);
         } else {
             respuestas.push(0);
             button.classList.add('styleOptionInactive');
-        clearInterval(timer);
+            clearInterval(timer);
         }
     } else {
         respuestas.push(0);
@@ -183,7 +190,7 @@ const validateResponse = (value, button, timeOut = false) => {
     }
     disableButtons()
     document.getElementById('siguiente').disabled = false;
-    
+
 };
 const disableButtons = () => {
     const buttons = document.querySelectorAll('button');
@@ -192,7 +199,28 @@ const disableButtons = () => {
     });
 }
 
-const printResults = (respuestas) => {
+firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+        try {
+            const playerID = db.collection('player').doc(user.email);
+            const doc = await playerID.get();
+            if (doc.exists) {
+                const playerData = doc.data();
+                console.log('Datos del jugador:', playerData);
+                // Puedes guardar estos datos en una variable global o en el localStorage para usarlos posteriormente
+                localStorage.setItem('playerData', JSON.stringify(playerData));
+            } else {
+                console.log('No se encontró el documento del jugador');
+            }
+        } catch (error) {
+            console.error('Error al obtener datos del jugador:', error);
+        }
+    } else {
+        console.log('Usuario no autenticado');
+    }
+});
+
+const printResults = async (respuestas) => {
     quiz.innerHTML = '';
     const puntuacion = respuestas.reduce((acc, sum) => acc += sum, 0);
     const divPuntuacion = document.createElement('DIV')
@@ -206,102 +234,245 @@ const printResults = (respuestas) => {
     divPuntuacion.append(pResultado)
 
     const newScore = {
-        date: fecha,
+        date: new Date().toLocaleDateString(),
         points: puntuacion
     };
-    scores.push(newScore);
-    localStorage.setItem("scores", JSON.stringify(scores));
-    const storedScores = JSON.parse(localStorage.getItem("scores"));
-    const divChartContainer = document.createElement('DIV')
-    divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
-    const textoChart = document.createElement('P')
-    textoChart.classList.add('textoChart')
-    textoChart.textContent = 'Tus puntuaciones'
-    const btnReturnPlay = document.createElement('BUTTON')
-    btnReturnPlay.textContent='Volver a Jugar'
-    btnReturnPlay.classList.add('btnReturnPlay')
-    const divScores = document.createElement('DIV');
-    divScores.classList.add('styleGrafica');
-    storedScores.forEach(score => {
-        const logScores = document.createElement('P');
-        logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
-        divScores.append(logScores);
-    });
 
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores,btnReturnPlay)
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const playerID = db.collection('player').doc(user.email);
+                const doc = await playerID.get();
+                if (doc.exists) {
+                    const playerData = doc.data();
+                    await db.collection('scores').add({
+                        uid: playerData.id,
+                        date: newScore.date,
+                        points: newScore.points
+                    });
+                    console.log('Puntuación guardada en Firestore');
+                } else {
+                    console.log('No se encontró el documento del jugador');
+                }
+            } catch (error) {
+                console.error('Error al guardar en Firestore:', error);
+            }
+        } else {
+            scores.push(newScore);
+            localStorage.setItem("scores", JSON.stringify(scores));
+        }
 
-    btnReturnPlay.addEventListener('click', () => {
-        index = 0;
-        respuestas = [];
-        score.points = 0;
-        printQuiz(results, index);
-    });
+        let storedScores;
+        if (user) {
+            try {
+                const playerID = db.collection('player').doc(user.email);
+                const doc = await playerID.get();
+                if (doc.exists) {
+                    const playerData = doc.data();
+                    const querySnapshot = await db.collection('scores').where('uid', '==', playerData.id).get();
+                    storedScores = querySnapshot.docs.map(doc => doc.data());
+                } else {
+                    console.log('No se encontró el documento del jugador');
+                }
+            } catch (error) {
+                console.error('Error al obtener datos de Firestore:', error);
+            }
+        } else {
+            storedScores = JSON.parse(localStorage.getItem("scores")) || [];
+        }
 
-    const data = {
-        labels: scores.map(resultado => resultado.date),
-        series: [scores.map(resultado => resultado.points)]
-    }
-    const options = {
-        showPoint: false,
-        showArea: true,
-        fullWidth: false,
-        chartPadding: {
-            top: 40,
-            right: 20,
-            bottom: 40
-        },
-        axisX: {
-            showGrid: true
-        },
-        axisY: {
-            low: 0,
-            high: 10,
-            onlyInteger: true,
-            referenceValue: 5,
-            showGrid: false
-        }
-    }
-    const chart = new Chartist.Line('.ct-chart', data, options);
-    chart.on('draw', function (context) {
-        if (context.type === 'point') {
-            context.element.attr({
-                style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
-            });
-        }
-        if (context.type === 'line') {
-            context.element.attr({
-                style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
-            });
-        }
-        if (context.type === 'area') {
-            context.element.attr({
-                style: 'fill: rgb(255, 0, 170);'
-            });
-        }
-    }); 
-    chart.on('created', function () {
-        const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
-        axisXLabels.forEach(function (label) {
-            label.style.transform = 'rotate(-45deg) translateX(-40px)';
-            label.style.textAnchor = 'end';
-            label.style.transformOrigin = '0 50%';
+        const divChartContainer = document.createElement('DIV')
+        divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
+        const textoChart = document.createElement('P')
+        textoChart.classList.add('textoChart')
+        textoChart.textContent = 'Tus puntuaciones'
+        const btnReturnPlay = document.createElement('BUTTON')
+        btnReturnPlay.textContent = 'Volver a Jugar'
+        btnReturnPlay.classList.add('btnReturnPlay')
+        const divScores = document.createElement('DIV');
+        divScores.classList.add('styleGrafica');
+        storedScores.forEach(score => {
+            const logScores = document.createElement('P');
+            logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
+            divScores.append(logScores);
         });
-        const linePath = document.querySelector('.ct-series .ct-line');
-        if (linePath) {
-            const length = linePath.getTotalLength();
-            linePath.style.transition = 'none';
-            linePath.style.strokeDasharray = length + ' ' + length;
-            linePath.style.strokeDashoffset = length;
-            linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
-            linePath.style.transition = 'stroke-dashoffset 2s ease-out';
-            linePath.style.strokeDashoffset = '0';
+
+        quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores, btnReturnPlay)
+
+        btnReturnPlay.addEventListener('click', () => {
+            index = 0;
+            respuestas = [];
+            score.points = 0;
+            printQuiz(results, index);
+        });
+
+        const data = {
+            labels: storedScores.map(resultado => resultado.date),
+            series: [storedScores.map(resultado => resultado.points)]
         }
+        const options = {
+            showPoint: false,
+            showArea: true,
+            fullWidth: false,
+            chartPadding: {
+                top: 40,
+                right: 20,
+                bottom: 40
+            },
+            axisX: {
+                showGrid: true
+            },
+            axisY: {
+                low: 0,
+                high: 10,
+                onlyInteger: true,
+                referenceValue: 5,
+                showGrid: false
+            }
+        }
+        const chart = new Chartist.Line('.ct-chart', data, options);
+        chart.on('draw', function (context) {
+            if (context.type === 'point') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
+                });
+            }
+            if (context.type === 'line') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                });
+            }
+            if (context.type === 'area') {
+                context.element.attr({
+                    style: 'fill: rgb(255, 0, 170);'
+                });
+            }
+        }); 
+        chart.on('created', function () {
+            const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
+            axisXLabels.forEach(function (label) {
+                label.style.transform = 'rotate(-45deg) translateX(-40px)';
+                label.style.textAnchor = 'end';
+                label.style.transformOrigin = '0 50%';
+            });
+            const linePath = document.querySelector('.ct-series .ct-line');
+            if (linePath) {
+                const length = linePath.getTotalLength();
+                linePath.style.transition = 'none';
+                linePath.style.strokeDasharray = length + ' ' + length;
+                linePath.style.strokeDashoffset = length;
+                linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
+                linePath.style.transition = 'stroke-dashoffset 2s ease-out';
+                linePath.style.strokeDashoffset = '0';
+            }
+        });
     });
 }
 
-const printResultsPage = () => {
+const printResultsPage = async () => {
+    const resultsPage = document.querySelector('.results');
+    if (!resultsPage) return;
 
-};
+    let storedScores;
+
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const playerID = db.collection('player').doc(user.email);
+                const doc = await playerID.get();
+                if (doc.exists) {
+                    const playerData = doc.data();
+                    const querySnapshot = await db.collection('scores').where('uid', '==', playerData.id).get();
+                    storedScores = querySnapshot.docs.map(doc => doc.data());
+                } else {
+                    console.log('No se encontró el documento del jugador');
+                }
+            } catch (error) {
+                console.error('Error al obtener datos de Firestore:', error);
+            }
+        } else {
+            storedScores = JSON.parse(localStorage.getItem("scores")) || [];
+        }
+
+        resultsPage.innerHTML = '';
+
+        const divChartContainer = document.createElement('DIV')
+        divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
+        const textoChart = document.createElement('P')
+        textoChart.classList.add('textoChart')
+        textoChart.textContent = 'Tus puntuaciones'
+        const divScores = document.createElement('DIV');
+        divScores.classList.add('styleGrafica');
+        storedScores.forEach(score => {
+            const logScores = document.createElement('P');
+            logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
+            divScores.append(logScores);
+        });
+
+        resultsPage.append(textoChart, divChartContainer, divScores);
+
+        const data = {
+            labels: storedScores.map(resultado => resultado.date),
+            series: [storedScores.map(resultado => resultado.points)]
+        }
+        const options = {
+            showPoint: false,
+            showArea: true,
+            fullWidth: false,
+            chartPadding: {
+                top: 40,
+                right: 20,
+                bottom: 40
+            },
+            axisX: {
+                showGrid: true
+            },
+            axisY: {
+                low: 0,
+                high: 10,
+                onlyInteger: true,
+                referenceValue: 5,
+                showGrid: false
+            }
+        }
+        const chart = new Chartist.Line('.ct-chart', data, options);
+        chart.on('draw', function (context) {
+            if (context.type === 'point') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
+                });
+            }
+            if (context.type === 'line') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                });
+            }
+            if (context.type === 'area') {
+                context.element.attr({
+                    style: 'fill: rgb(255, 0, 170);'
+                });
+            }
+        });
+        chart.on('created', function () {
+            const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
+            axisXLabels.forEach(function (label) {
+                label.style.transform = 'rotate(-45deg) translateX(-40px)';
+                label.style.textAnchor = 'end';
+                label.style.transformOrigin = '0 50%';
+            });
+            const linePath = document.querySelector('.ct-series .ct-line');
+            if (linePath) {
+                const length = linePath.getTotalLength();
+                linePath.style.transition = 'none';
+                linePath.style.strokeDasharray = length + ' ' + length;
+                linePath.style.strokeDashoffset = length;
+                linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
+                linePath.style.transition = 'stroke-dashoffset 2s ease-out';
+                linePath.style.strokeDashoffset = '0';
+            }
+        });
+    });
+}
 
 const validateInicio = (valueOption) => {
     const container1 = document.querySelector('#modal-container1');
@@ -317,17 +488,17 @@ const validateInicio = (valueOption) => {
     } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } else if (valueOption =='resultados') {
+    } else if (valueOption == 'resultados') {
         console.log('resultados');
         window.location.href = 'results.html';
     }
 
-    cancelarbtn.forEach((btn)=>{
-        btn.addEventListener('click',()=>{
+    cancelarbtn.forEach((btn) => {
+        btn.addEventListener('click', () => {
             container1.close()
             container2.close()
-    })    //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-})
+        })    //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    })
 };
 
 // AUTENTICACION
@@ -439,8 +610,13 @@ const createPlayer = (player) => {
 
 //alerts de contraseña no valida en sign up player y login
 //loginplayer sin alert con id, solo email
-//else if valueOption == resultados en funcion validateInicio, cambio del value del boton resultados en html 
-//results.html con estilos de style y fuentes arcade linkeados
+//else if valueOption == resultados en funcion validateInicio, cambio del value del boton resultados en html
+//results.html con estilos de style.css y fuentes arcade linkeados
 //añadido enlace a api de chartist
 //añadida cancion del mario en results
+// añadida funcion de firebase para recuperar los datos del usuario
+// modificada funcion printResults para usar datos de firestore y pintarlos en el localStorage
+// creada la funcion printResultsPage para pintar results.hmtl al clickear el boton resultados
+// falta enlazarlo porque aun no existe en el popup
+
 
