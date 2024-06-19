@@ -4,7 +4,7 @@ html, body{
     height: 100%  
 }
 body{
-    background-image: url(/assets/istockphoto-1148595387-612x612.jpg);
+    background-image: url("../assets/istockphoto-1148595387-612x612.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }
@@ -28,7 +28,7 @@ section{
     width: 90%;
     margin: 0 auto;
     border: none;
-    border-radius: 10px;  
+    border-radius: 10px;
 }
 
 .option1, .option2, .option3, .option4{
@@ -63,7 +63,7 @@ section{
 
 }
 .quiz{
-    margin-top: 20px;
+    margin-top: 40px;
     border-radius: 5px;
     gap: 10px;
     display: flex;

@@ -5,11 +5,12 @@ const firebaseConfig = {
     storageBucket: "proyecto-grupal-quiz.appspot.com",
     messagingSenderId: "596977327919",
     appId: "1:596977327919:web:21c896093f84fd41274bda"
-};
+  };
 
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
 
-const db = firebase.firestore();// db representa mi BBDD //inicia Firestore
+const db = firebase.firestore();
+const auth = firebase.auth();
 
 let quiz = document.querySelector('.quiz');
 let options = [];
@@ -31,6 +32,8 @@ const score = {
 let scores = JSON.parse(localStorage.getItem("scores")) || [];
 let timeLeft = 10;
 let timer;
+let imagenPerfil = document.querySelector('.profileImagen')
+let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
     if (btnHome) {
@@ -93,13 +96,12 @@ const getData = async () => {
 }
 
 const printQuiz = (results, i) => {
+    startTimer()
     if (index === 10) {
         printResults(respuestas);
-        const botonActivo = document.querySelector('.styleOptionActive')
-        botonActivo.classList.remove('styleOptionActive')
         return;
     }
-
+    
     quiz.innerHTML = '';
     options = shuffle([...results[i].incorrect_answers, results[i].correct_answer]);
     const pregunta = document.createElement('H3');
@@ -148,6 +150,7 @@ function startTimer() {
             clearInterval(timer);
             validateResponse(null, null, true);
             disableButtons()
+            document.getElementById('time').textContent = 'Tiempo Agotado';
         } else {
             timeLeft--;
             document.getElementById('time').textContent = timeLeft;
@@ -221,13 +224,13 @@ const printResults = (respuestas) => {
         divScores.append(logScores);
     });
 
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores,btnReturnPlay)
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer,btnReturnPlay)
 
     btnReturnPlay.addEventListener('click', () => {
         index = 0;
         respuestas = [];
         score.points = 0;
-        printQuiz(results, index);
+        getData();
     });
 
     const data = {
@@ -312,7 +315,7 @@ const validateInicio = (valueOption) => {
         btn.addEventListener('click',()=>{
             container1.close()
             container2.close()
-    })    //Roberto PERFECCIONARA esto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    })  
 })
 };
 
@@ -379,22 +382,37 @@ const createPlayer = (player) => {
         .catch((error) => console.error("Error adding document: ", error));
 };
 
+const uploadFile = ()=> {
+    const file = document.getElementById("files").files[0];
+    const user = firebase.auth().currentUser;
+    const storageRef = firebase.storage().ref();
+    const thisRef = storageRef.child(`images/${user.uid}.jpg`);
 
-//animacion tiempo
-//animacion botones
-//Guardar en firebase y LocalStorage
-//Crear Usuarios Login y Resistro
+    thisRef.put(file).then((snapshot) =>{
+        alert("Imagen subida");
+        console.log('Imagen subida correctamente!');
+        return thisRef.getDownloadURL();
+    }).then((url)=> {
+        return user.updateProfile({
+            photoURL: url
+        }).then(()=> {
+            console.log("Perfil actualizado con la nueva imagen");
+            displayImage(url);
+        });
+    }).catch((error)=> {
+        console.error("Error al subir imagen o actualizar perfil: ", error);
+        alert("Error al subir imagen o actualizar perfil.");
+    });
+}
+document.getElementById("uploadButton").addEventListener("click", uploadFile);
 
-// btnLogin.addEventListener('click', ()=>{
-//     login.classList.add('showContainer')
-// })
-// btnRegister.addEventListener('click',()=>{
-//     registro.classList.add('showContainer')
-// })
-// btnCancelar.forEach((boton)=>{
-//     boton.addEventListener('click',()=>{
-//     registro.classList.remove('showContainer')
-//     login.classList.remove('showContainer')
-// })
-// })
+const displayImage = (url)=> {
+    const img = document.createElement('img');
+    img.src = url;
+    img.classList.add('styleProfile')
+    imagenPerfil.innerHTML = '';
+    imagenPerfil.append(img);
+    divImagenFav.style.display= 'none'
+    
+}
 
