@@ -69,9 +69,7 @@ document.addEventListener('submit', (event)=>{
         let password = event.target.elements.pass.value;
         signUpPlayer(email, password)
     } else if (event.target.id == "form2"){
-        console.log(event.target.elements[0].value)
         let email = event.target.elements[0].value;
-        console.log(event.target.elements[1].value)
         let password = event.target.elements[1].value;
         
         loginPlayer(email,password)
@@ -328,6 +326,7 @@ const loginPlayer = async (email, password) => {
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
             alert(`se ha logado ${player.email} ID:${player.uid}`)
             console.log("PLAYER", player);
+            
             //meter la funcion de cerrar el popUp cuando esté
         })
         .catch((error) => {
@@ -353,10 +352,11 @@ const signUpPlayer = (email, password) => {
     firebase
         .auth()
         .createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
+        .then(async(userCredential) => {
             let user = userCredential.user;
             console.log(`se ha registrado ${user.email} ID:${user.uid}`)
             alert(`se ha registrado ${user.email} con éxito`)
+            await loginPlayer(user.email, user.password)//cuando te das de alta te logea  
             // ...
             // Saves user in firestore
             createPlayer({
