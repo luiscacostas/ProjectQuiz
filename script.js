@@ -353,10 +353,11 @@ const signUpPlayer = (email, password) => {
     firebase
         .auth()
         .createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
             let user = userCredential.user;
             console.log(`se ha registrado ${user.email} ID:${user.uid}`)
             alert(`se ha registrado ${user.email} con éxito`)
+            await loginPlayer(user.email, user.password)
             // ...
             // Saves user in firestore
             createPlayer({
