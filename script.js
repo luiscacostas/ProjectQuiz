@@ -5,11 +5,12 @@ const firebaseConfig = {
     storageBucket: "proyecto-grupal-quiz.appspot.com",
     messagingSenderId: "596977327919",
     appId: "1:596977327919:web:21c896093f84fd41274bda"
-};
+  };
 
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
 
-const db = firebase.firestore();// db representa mi BBDD //inicia Firestore
+const db = firebase.firestore();
+const auth = firebase.auth();
 
 let quiz = document.querySelector('.quiz');
 let options = [];
@@ -31,6 +32,8 @@ const score = {
 let scores = JSON.parse(localStorage.getItem("scores")) || [];
 let timeLeft = 10;
 let timer;
+let imagenPerfil = document.querySelector('.profileImagen')
+let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
     if (btnHome) {
@@ -379,7 +382,39 @@ const createPlayer = (player) => {
         .catch((error) => console.error("Error adding document: ", error));
 };
 
+const uploadFile = ()=> {
+    const file = document.getElementById("files").files[0];
+    const user = firebase.auth().currentUser;
+    const storageRef = firebase.storage().ref();
+    const thisRef = storageRef.child(`images/${user.uid}.jpg`);
 
+    thisRef.put(file).then((snapshot) =>{
+        alert("Imagen subida");
+        console.log('Imagen subida correctamente!');
+        return thisRef.getDownloadURL();
+    }).then((url)=> {
+        return user.updateProfile({
+            photoURL: url
+        }).then(()=> {
+            console.log("Perfil actualizado con la nueva imagen");
+            displayImage(url);
+        });
+    }).catch((error)=> {
+        console.error("Error al subir imagen o actualizar perfil: ", error);
+        alert("Error al subir imagen o actualizar perfil.");
+    });
+}
+document.getElementById("uploadButton").addEventListener("click", uploadFile);
+
+const displayImage = (url)=> {
+    const img = document.createElement('img');
+    img.src = url;
+    img.classList.add('styleProfile')
+    imagenPerfil.innerHTML = '';
+    imagenPerfil.append(img);
+    divImagenFav.style.display= 'none'
+    
+}
 //animacion tiempo
 //animacion botones
 //Guardar en firebase y LocalStorage

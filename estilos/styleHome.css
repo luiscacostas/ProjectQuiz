@@ -193,3 +193,8 @@ html, body {
   padding: 20px 50px;
   cursor: pointer;
 }
+.styleProfile{
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+}

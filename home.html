@@ -11,6 +11,7 @@
 
 <body  class="contenedor">
     <audio src="music/epic-battle-153400.mp3" type="audio/mp3" autoplay loop></audio>
+    <div class="profileImagen"></div>
 
     <main>
         <div id="div-inicio">
@@ -70,11 +71,17 @@
 
     </section>
 
+    <div class="subirImagen">
+        <input type="file" id="files">
+        <button id="uploadButton">Subir Imagen</button>
+    </div>
+
     
     <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-firestore.js"></script>
     <!--link a la base de datos de firebase-->
     <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
     <!--link a la autentificacion de firebase-->
 
     <script src="script.js"></script>
