@@ -5,10 +5,18 @@ const firebaseConfig = {
     storageBucket: "proyecto-grupal-quiz.appspot.com",
     messagingSenderId: "596977327919",
     appId: "1:596977327919:web:21c896093f84fd41274bda"
-  };
+};
 
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
 const auth = firebase.auth();
+
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+        console.log("Persistencia de sesión configurada a LOCAL");
+    })
+    .catch((error) => {
+        console.error("Error configurando la persistencia de sesión:", error.message);
+    });
 
 let provider = new firebase.auth.GoogleAuthProvider();
 
@@ -45,18 +53,35 @@ let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log("Usuario está logueado:", user.email);
+            menuPlayer();
+            displayImage(user.photoURL || '../assets/image_defecto.png');
+        } else {
+            console.log("Usuario no está logueado");
+        }})
+
     if (btnOptions) {
-        btnOptions.addEventListener('click', (ev)=> {
-        if(ev.target.value == 'salir del perfil'){
-            console.log("dentro del boton salir")
-            signOutPlayer()
-        } else if (ev.target.value == 'cambiar imagen'){
-            const subirImagen = document.querySelector('#subirImagen')
-            subirImagen.showModal();
-        } 
+        btnOptions.addEventListener('click', (ev) => {
+            if (ev.target.value == 'salir del perfil') {
+                console.log("dentro del boton salir")
+                signOutPlayer()
+            } else if (ev.target.value == 'cambiar imagen') {
+                const subirImagen = document.querySelector('#subirImagen')
+                const archivoImagen = document.querySelector('#archivoImagen')
+                subirImagen.showModal();
+                if (archivoImagen.style.display == 'none'){
+                    archivoImagen.style.display = '';
+                }
+            } else if (ev.target.value == 'borrar cuenta'){
+                deletePlayer();
+                
+            }
+        }
+
+        )
     }
-        
-)}
 
 
     if (btnHome) {
@@ -96,38 +121,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (container2) {
         container2.addEventListener('click', async (ev) => {
             if (ev.target.id === 'btnGoogle') {
-                try{
-                await loginGoogle();
-                menuPlayer();
-                const user = firebase.auth().currentUser
-                console.log(user.uid, user.email)
-                console.log("he cerrado la ventana")
-                console.log(user.uid, user.email)
-                createPlayer({
-                    id: user.uid,
-                    email: user.email,
-                    imagen: "gs://proyecto-grupal-quiz.appspot.com/images/yGWbojjZ0ucnertBphwkNtCShcg2.jpg",
-                });
-                container2.close();
-                console.log("he creado el usuario en la BBDD")
-             } catch (error){}
+                try {
+                    await loginGoogle();
+                    menuPlayer();
+                    const user = firebase.auth().currentUser
+                    console.log(user.uid, user.email)
+                    console.log("he cerrado la ventana")
+                    console.log(user.uid, user.email)
+                    createPlayer({
+                        id: user.uid,
+                        email: user.email,
+                        imagen: "gs://proyecto-grupal-quiz.appspot.com/images/yGWbojjZ0ucnertBphwkNtCShcg2.jpg",
+                    });
+                    container2.close();
+                    console.log("he creado el usuario en la BBDD")
+                } catch (error) { }
             }
         })
     }
 });
 
-document.addEventListener('submit', (event)=>{
+document.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (event.target.id == "form1"){
+    if (event.target.id == "form1") {
         let email = event.target.elements.email.value;
         let password = event.target.elements.pass.value;
         signUpPlayer(email, password)
-    } else if (event.target.id == "form2"){
+    } else if (event.target.id == "form2") {
         let email = event.target.elements[0].value;
         let password = event.target.elements[1].value;
-        
-        loginPlayer(email,password)
-    } 
+
+        loginPlayer(email, password)
+    }
 })
 
 const getData = async () => {
@@ -152,7 +177,7 @@ const printQuiz = (results, i) => {
         printResults(respuestas);
         return;
     }
-    
+
     quiz.innerHTML = '';
     options = shuffle([...results[i].incorrect_answers, results[i].correct_answer]);
     const pregunta = document.createElement('H3');
@@ -190,7 +215,7 @@ const printQuiz = (results, i) => {
     divReloj.append(timeSpan)
     quiz.append(divReloj)
 
-    buttonHome.addEventListener('click', ()=>{
+    buttonHome.addEventListener('click', () => {
         window.location.href = 'home.html';
     })
 
@@ -224,11 +249,11 @@ const validateResponse = (value, button, timeOut = false) => {
         if (value === results[index].correct_answer) {
             button.classList.add('styleOptionActive');
             respuestas.push(1);
-        clearInterval(timer);
+            clearInterval(timer);
         } else {
             respuestas.push(0);
             button.classList.add('styleOptionInactive');
-        clearInterval(timer);
+            clearInterval(timer);
         }
     } else {
         respuestas.push(0);
@@ -239,7 +264,7 @@ const validateResponse = (value, button, timeOut = false) => {
     }
     disableButtons()
     document.getElementById('siguiente').disabled = false;
-    
+
 };
 
 const disableButtons = () => {
@@ -275,7 +300,7 @@ const printResults = (respuestas) => {
     textoChart.classList.add('textoChart')
     textoChart.textContent = 'Tus puntuaciones'
     const btnReturnPlay = document.createElement('BUTTON')
-    btnReturnPlay.textContent='Volver a Jugar'
+    btnReturnPlay.textContent = 'Volver a Jugar'
     btnReturnPlay.classList.add('btnReturnPlay')
     const divScores = document.createElement('DIV');
     divScores.classList.add('styleGrafica');
@@ -285,7 +310,7 @@ const printResults = (respuestas) => {
         divScores.append(logScores);
     });
 
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer,btnReturnPlay)
+    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, btnReturnPlay)
 
     btnReturnPlay.addEventListener('click', () => {
         index = 0;
@@ -335,7 +360,7 @@ const printResults = (respuestas) => {
                 style: 'fill: rgb(255, 0, 170);'
             });
         }
-    }); 
+    });
     chart.on('created', function () {
         const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
         axisXLabels.forEach(function (label) {
@@ -371,36 +396,42 @@ const validateInicio = (valueOption) => {
     } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } else if(valueOption == 'Opciones'){
+    } else if (valueOption == 'Opciones') {
         popUpOpciones.showModal();
-    } else if(valueOption == 'salir del perfil'){
+    } else if (valueOption == 'salir del perfil') {
         console.log("dentro del boton salir")
         signOutPlayer()
     }
 
-     cancelarbtn.forEach((btn)=>{
-        btn.addEventListener('click',()=>{
+    cancelarbtn.forEach((btn) => {
+        btn.addEventListener('click', () => {
             container1.close()
             container2.close()
             popUpOpciones.close()
             container3.close()
             subirImagen.close()
-    })  
-})
+        })
+    })
 };
 
 // AUTENTICACION
 
-const loginGoogle = async () =>{
- try {const response = await firebase.auth().signInWithPopup(provider);
- console.log(response);
- return response.user;
- } catch (error){
-    throw new Error(error)
- }
+const loginGoogle = async () => {
+    const user = firebase.auth().currentUser
+    try {
+        const response = await firebase.auth().signInWithPopup(provider);
+        console.log(response);
+        if (user.photoURL) {
+            displayImage(user.photoURL);
+        } else {displayImage()}
+        return response.user;
+    } catch (error) {
+        throw new Error(error)
+    }
 };
 
 const loginPlayer = async (email, password) => {
+    const user = firebase.auth().currentUser
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const container2 = document.querySelector('#modal-container2');
@@ -408,10 +439,17 @@ const loginPlayer = async (email, password) => {
             let player = userCredential.user;
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
             if (container2.open == true) {
-                container2.close()}//cierra el popUp si esta abierto
+                container2.close()
+            }//cierra el popUp si esta abierto
             alert(`se ha logado ${player.email} ID:${player.uid}`)
             console.log("PLAYER", player);
             //cambia el menú y muetra la imagen de usuario
+            if (user.photoURL) {
+                console.log(user.photoURL)
+                displayImage(user.photoURL);
+            }else {
+                displayImage()
+            };
             menuPlayer();
         })
         .catch((error) => {
@@ -468,7 +506,21 @@ const createPlayer = (player) => {
         .catch((error) => console.error("Error adding document: ", error));
 };
 
-const menuPlayer = ()=>{
+const deletePlayer = async () => {
+    const user = firebase.auth().currentUser;
+    const userEmail = user.email;
+    db.collection('player').where('email', '==', userEmail).get()
+    .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+            doc.ref.delete(); // Elimina el documento encontrado
+        });
+    })
+    .catch(error => {
+        console.error('Error al buscar y eliminar documento:', error);
+    });
+}
+
+const menuPlayer = () => {
     const btnLogin = document.querySelector('#btnLogin');
     const btnRegister = document.querySelector('#btnRegistro');
     const btnContenedor = document.querySelector('#btnContenedor');
@@ -485,36 +537,38 @@ const menuPlayer = ()=>{
     btnContenedor.append(btnOpciones)
 };
 
-const uploadFile = ()=> {
+//imagen usuario
+
+const uploadFile = () => {
     const file = document.getElementById("files").files[0];
     const user = firebase.auth().currentUser;
     const storageRef = firebase.storage().ref();
     const thisRef = storageRef.child(`images/${user.uid}.jpg`);
 
-    thisRef.put(file).then((snapshot) =>{
+    thisRef.put(file).then((snapshot) => {
         alert("Imagen subida");
         console.log('Imagen subida correctamente!');
         return thisRef.getDownloadURL();
-    }).then((url)=> {
+    }).then((url) => {
         return user.updateProfile({
             photoURL: url
-        }).then(()=> {
+        }).then(() => {
             console.log("Perfil actualizado con la nueva imagen");
             displayImage(url);
         });
-    }).catch((error)=> {
+    }).catch((error) => {
         console.error("Error al subir imagen o actualizar perfil: ", error);
         alert("Error al subir imagen o actualizar perfil.");
     });
 }
 document.getElementById("uploadButton").addEventListener("click", uploadFile);
 
-const displayImage = (url)=> {
+const displayImage = (url = '../assets/image_defecto.png') => {
     const img = document.createElement('img');
     img.src = url;
     img.classList.add('styleProfile')
     imagenPerfil.innerHTML = '';
     imagenPerfil.append(img);
-    divImagenFav.style.display= 'none'
+    divImagenFav.style.display = 'none'
 }
 
