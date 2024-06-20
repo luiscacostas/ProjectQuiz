@@ -207,7 +207,6 @@ firebase.auth().onAuthStateChanged(async (user) => {
             if (doc.exists) {
                 const playerData = doc.data();
                 console.log('Datos del jugador:', playerData);
-                // Puedes guardar estos datos en una variable global o en el localStorage para usarlos posteriormente
                 localStorage.setItem('playerData', JSON.stringify(playerData));
             } else {
                 console.log('No se encontró el documento del jugador');
@@ -234,7 +233,7 @@ const printResults = async (respuestas) => {
     divPuntuacion.append(pResultado)
 
     const newScore = {
-        date: new Date().toLocaleDateString(),
+        date: fecha,
         points: puntuacion
     };
 
@@ -311,7 +310,7 @@ const printResults = async (respuestas) => {
             series: [storedScores.map(resultado => resultado.points)]
         }
         const options = {
-            showPoint: false,
+            showPoint: true,
             showArea: true,
             fullWidth: false,
             chartPadding: {
@@ -347,7 +346,7 @@ const printResults = async (respuestas) => {
                     style: 'fill: rgb(255, 0, 170);'
                 });
             }
-        }); 
+        });
         chart.on('created', function () {
             const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
             axisXLabels.forEach(function (label) {
@@ -361,8 +360,8 @@ const printResults = async (respuestas) => {
                 linePath.style.transition = 'none';
                 linePath.style.strokeDasharray = length + ' ' + length;
                 linePath.style.strokeDashoffset = length;
-                linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
-                linePath.style.transition = 'stroke-dashoffset 2s ease-out';
+                linePath.getBoundingClientRect();
+                linePath.style.transition = 'stroke-dashoffset 3s ease-out';
                 linePath.style.strokeDashoffset = '0';
             }
         });
@@ -416,7 +415,7 @@ const printResultsPage = async () => {
             series: [storedScores.map(resultado => resultado.points)]
         }
         const options = {
-            showPoint: false,
+            showPoint: true,
             showArea: true,
             fullWidth: false,
             chartPadding: {
@@ -466,8 +465,8 @@ const printResultsPage = async () => {
                 linePath.style.transition = 'none';
                 linePath.style.strokeDasharray = length + ' ' + length;
                 linePath.style.strokeDashoffset = length;
-                linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
-                linePath.style.transition = 'stroke-dashoffset 2s ease-out';
+                linePath.getBoundingClientRect();
+                linePath.style.transition = 'stroke-dashoffset 3s ease-out';
                 linePath.style.strokeDashoffset = '0';
             }
         });
@@ -506,13 +505,10 @@ const validateInicio = (valueOption) => {
 const loginPlayer = async (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Signed in
             let player = userCredential.user;
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
             alert(`se ha logado ${player.email}`)
             console.log("PLAYER", player);
-            //meter la funcion de cerrar el popUp cuando esté
-            //
         })
         .catch((error) => {
             let errorCode = error.code;
@@ -531,7 +527,6 @@ const loginPlayer = async (email, password) => {
             } else {
                 alert('Error al iniciar sesión: ' + errorCode);
             }
-
         });
 
 };
@@ -553,8 +548,6 @@ const signUpPlayer = (email, password) => {
             let user = userCredential.user;
             console.log(`se ha registrado ${user.email} ID:${user.uid}`)
             alert(`se ha registrado ${user.email} con éxito`)
-            // ...
-            // Saves user in firestore
             createPlayer({
                 id: user.uid,
                 email: user.email,
@@ -577,7 +570,6 @@ const signUpPlayer = (email, password) => {
                 alert('Error al iniciar sesión: ' + errorCode);
             }
         });
-
 };
 
 const createPlayer = (player) => {
@@ -588,6 +580,30 @@ const createPlayer = (player) => {
         .catch((error) => console.log("Error en el sistema: " + error.message, "Error: " + error.code));
 };
 
+// const obtenerRankingJugadores = async (db) => {
+//     try {
+//         const querySnapshot = await db.collection('player')
+//             .orderBy('scores', 'desc')
+//             .get();
+
+//         const jugadores = [];
+//         querySnapshot.forEach((doc) => {
+//             const jugador = {
+//                 id: doc.id,
+//                 ...doc.data(),
+//             };
+//             jugadores.push(jugador);
+//         });
+
+//         return jugadores;
+//     } catch (error) {
+//         console.error('Error al obtener los documentos:', error);
+//         return null;
+//     }
+// }
+
+// const ranking = obtenerRankingJugadores(db);
+// console.log('Ranking de jugadores:', ranking);
 
 //animacion tiempo
 //animacion botones
@@ -618,5 +634,6 @@ const createPlayer = (player) => {
 // modificada funcion printResults para usar datos de firestore y pintarlos en el localStorage
 // creada la funcion printResultsPage para pintar results.hmtl al clickear el boton resultados
 // falta enlazarlo porque aun no existe en el popup
-
+//ya se pinta la puntuación cuando hay sólo un punto
+//modificado el formato fecha
 
