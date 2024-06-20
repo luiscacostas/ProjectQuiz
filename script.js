@@ -333,7 +333,7 @@ const printResults = async (respuestas) => {
         chart.on('draw', function (context) {
             if (context.type === 'point') {
                 context.element.attr({
-                    style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
                 });
             }
             if (context.type === 'line') {
@@ -438,7 +438,7 @@ const printResultsPage = async () => {
         chart.on('draw', function (context) {
             if (context.type === 'point') {
                 context.element.attr({
-                    style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
                 });
             }
             if (context.type === 'line') {
