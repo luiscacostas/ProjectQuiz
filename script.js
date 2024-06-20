@@ -9,6 +9,8 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
 
+let provider = new firebase.auth.GoogleAuthProvider();
+
 const db = firebase.firestore();
 const auth = firebase.auth();
 
@@ -357,6 +359,33 @@ const validateInicio = (valueOption) => {
 };
 
 // AUTENTICACION
+
+const loginGoogle = async () =>{
+    firebase.auth()
+  .signInWithPopup(provider)
+  .then((result) => {
+    /** @type {firebase.auth.OAuthCredential} */
+    let credential = result.credential;
+
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    let token = credential.accessToken;
+    // The signed-in user info.
+    let user = result.user;
+    // IdP data available in result.additionalUserInfo.profile.
+    alert(`se ha logado ${player.email} ID:${player.uid}`)
+    console.log("PLAYER", player);
+    menuPlayer();
+  }).catch((error) => {
+    // Handle Errors here.
+    let errorCode = error.code;
+    let errorMessage = error.message;
+    // The email of the user's account used.
+    let email = error.email;
+    // The firebase.auth.AuthCredential type that was used.
+    let credential = error.credential;
+    // ...
+  })
+};
 
 const loginPlayer = async (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password)
