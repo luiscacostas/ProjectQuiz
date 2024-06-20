@@ -50,6 +50,7 @@ const container1 = document.querySelector('#modal-container1');
 const container2 = document.querySelector('#modal-container2');
 let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
+let dialogImagen = document.querySelector('#subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -555,6 +556,7 @@ const uploadFile = () => {
         }).then(() => {
             console.log("Perfil actualizado con la nueva imagen");
             displayImage(url);
+            dialogImagen.close();
         });
     }).catch((error) => {
         console.error("Error al subir imagen o actualizar perfil: ", error);
