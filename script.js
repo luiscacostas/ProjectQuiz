@@ -40,8 +40,6 @@ let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    
     if (btnOptions) {
         btnOptions.addEventListener('click', (ev)=> {
         if(ev.target.value == 'salir del perfil'){
@@ -50,8 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 )}
-
-
     if (btnHome) {
         btnHome.addEventListener('click', (ev) => {
             ev.preventDefault();
@@ -61,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     if (quiz) {
         quiz.addEventListener('click', (ev) => {
             ev.preventDefault();
@@ -250,6 +245,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
 });
 
 const printResults = async (respuestas) => {
+   
     quiz.innerHTML = '';
     const puntuacion = respuestas.reduce((acc, sum) => acc += sum, 0);
     const divPuntuacion = document.createElement('DIV')
@@ -266,8 +262,8 @@ const printResults = async (respuestas) => {
         date: fecha,
         points: puntuacion
     };
-    scores.push(newScore);
-    localStorage.setItem("scores", JSON.stringify(scores));
+    score.push(newScore);
+    localStorage.setItem("scores", JSON.stringify(score));
     const storedScores = JSON.parse(localStorage.getItem("scores"));
     const divChartContainer = document.createElement('DIV')
     divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
@@ -285,7 +281,6 @@ const printResults = async (respuestas) => {
         divScores.append(logScores);
     });
 
-        quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, divScores, btnReturnPlay)
     quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer,btnReturnPlay)
 
         btnReturnPlay.addEventListener('click', () => {
@@ -359,10 +354,10 @@ const printResults = async (respuestas) => {
                 linePath.getBoundingClientRect();
                 linePath.style.transition = 'stroke-dashoffset 3s ease-out';
                 linePath.style.strokeDashoffset = '0';
-            }
+          }
         });
-    });
-}
+    };
+
 
 const printResultsPage = async () => {
     const resultsPage = document.querySelector('.results');
@@ -642,30 +637,44 @@ const displayImage = (url)=> {
     imagenPerfil.append(img);
     divImagenFav.style.display= 'none'
 }
-        .catch((error) => console.log("Error en el sistema: " + error.message, "Error: " + error.code));
+
+const saveScoreToFirebase = async (userId, score) => {
+    try {
+        const scoreData = {
+            date: new Date().toISOString(),
+            points: score
+        };
+        const userRef = db.collection('players').doc(userId);
+        await userRef.update({
+            scores: firebase.firestore.FieldValue.arrayUnion(scoreData)
+        });
+        console.log('Score saved successfully!');
+    } catch (error) {
+        console.error('Error saving score:', error);
+    }
 };
 
-// const obtenerRankingJugadores = async (db) => {
-//     try {
-//         const querySnapshot = await db.collection('player')
-//             .orderBy('scores', 'desc')
-//             .get();
+const obtenerRankingJugadores = async (db) => {
+    try {
+        const querySnapshot = await db.collection('player')
+            .orderBy('scores', 'desc')
+            .get();
 
-//         const jugadores = [];
-//         querySnapshot.forEach((doc) => {
-//             const jugador = {
-//                 id: doc.id,
-//                 ...doc.data(),
-//             };
-//             jugadores.push(jugador);
-//         });
+        const jugadores = [];
+        querySnapshot.forEach((doc) => {
+            const jugador = {
+                id: doc.id,
+                ...doc.data(),
+            };
+            jugadores.push(jugador);
+        });
 
-//         return jugadores;
-//     } catch (error) {
-//         console.error('Error al obtener los documentos:', error);
-//         return null;
-//     }
-// }
+        return jugadores;
+    } catch (error) {
+        console.error('Error al obtener los documentos:', error);
+        return null;
+    }
+}
 
 // const ranking = obtenerRankingJugadores(db);
 // console.log('Ranking de jugadores:', ranking);
