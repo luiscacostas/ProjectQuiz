@@ -23,6 +23,7 @@ let fecha = new Date().toLocaleDateString('es-ES', {
     day: 'numeric'
 });
 let btnHome = document.querySelector('#btnContenedor');
+const btnOptions = document.querySelector('#optionsContainer')
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
 const score = {
@@ -38,6 +39,18 @@ let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
+    
+    
+    if (btnOptions) {
+        btnOptions.addEventListener('click', (ev)=> {
+        if(ev.target.value == 'salir del perfil'){
+            console.log("dentro del boton salir")
+            signOutPlayer()
+        }
+    }
+)}
+
+
     if (btnHome) {
         btnHome.addEventListener('click', (ev) => {
             ev.preventDefault();
@@ -403,14 +416,13 @@ const createPlayer = (player) => {
 };
 
 const menuPlayer = ()=>{
+    const btnLogin = document.querySelector('#btnLogin');
+    const btnRegister = document.querySelector('#btnRegistro');
     const btnContenedor = document.querySelector('#btnContenedor');
     console.log(btnContenedor);
-    const btnLogin = document.querySelector('#btnLogin');
-    console.log(btnLogin);
-    const btnRegistro = document.querySelector('#btnRegistro');
-    console.log(btnRegistro);
+    console.log(btnRegister);
     btnLogin.remove();
-    btnRegistro.remove();
+    btnRegister.remove();
 
     const btnOpciones = document.createElement('button');
     btnOpciones.classList.add('btnInicio');
