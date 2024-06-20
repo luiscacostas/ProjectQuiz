@@ -23,6 +23,7 @@ let fecha = new Date().toLocaleDateString('es-ES', {
     day: 'numeric'
 });
 let btnHome = document.querySelector('#btnContenedor');
+const btnOptions = document.querySelector('#optionsContainer')
 const btnLogin = document.querySelector('#login');
 const btnRegister = document.querySelector('#registro');
 const score = {
@@ -32,10 +33,24 @@ const score = {
 let scores = JSON.parse(localStorage.getItem("scores")) || [];
 let timeLeft = 10;
 let timer;
+const container1 = document.querySelector('#modal-container1');
+const container2 = document.querySelector('#modal-container2');
 let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
+    
+    
+    if (btnOptions) {
+        btnOptions.addEventListener('click', (ev)=> {
+        if(ev.target.value == 'salir del perfil'){
+            console.log("dentro del boton salir")
+            signOutPlayer()
+        }
+    }
+)}
+
+
     if (btnHome) {
         btnHome.addEventListener('click', (ev) => {
             ev.preventDefault();
@@ -58,8 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 index++;
                 printQuiz(results, index);
                 startTimer()
-            }
-
+            } /*else if (ev.target.classList.contains('cancelar')) {
+                console.log("entro en cancelar")
+                if (container1.open === true){
+                    container1.close();
+                } else if (container2 === false){
+                    container2.close();
+                }
+            }*/
         });
         getData();
     }
@@ -72,13 +93,11 @@ document.addEventListener('submit', (event)=>{
         let password = event.target.elements.pass.value;
         signUpPlayer(email, password)
     } else if (event.target.id == "form2"){
-        console.log(event.target.elements[0].value)
         let email = event.target.elements[0].value;
-        console.log(event.target.elements[1].value)
         let password = event.target.elements[1].value;
         
         loginPlayer(email,password)
-    }
+    } 
 })
 
 const getData = async () => {
@@ -307,8 +326,7 @@ const printResults = (respuestas) => {
 }
 
 const validateInicio = (valueOption) => {
-    const container1 = document.querySelector('#modal-container1');
-    const container2 = document.querySelector('#modal-container2');
+    const popUpOpciones = document.querySelector('#options')
     const container3 = document.querySelector('#modal-container3');
     const cancelarbtn = document.querySelectorAll('.cancelar')
 
@@ -321,14 +339,18 @@ const validateInicio = (valueOption) => {
     } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } else if(valueOption == 'ranking'){
-        container3.showModal()
+    } else if(valueOption == 'Opciones'){
+        popUpOpciones.showModal();
+    } else if(valueOption == 'salir del perfil'){
+        console.log("dentro del boton salir")
+        signOutPlayer()
     }
 
-    cancelarbtn.forEach((btn)=>{
+     cancelarbtn.forEach((btn)=>{
         btn.addEventListener('click',()=>{
             container1.close()
             container2.close()
+            popUpOpciones.close()
             container3.close()
     })  
 })
@@ -339,12 +361,16 @@ const validateInicio = (valueOption) => {
 const loginPlayer = async (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
+            const container2 = document.querySelector('#modal-container2');
             // Signed in
             let player = userCredential.user;
             console.log(`se ha logado ${player.email} ID:${player.uid}`)
+            if (container2.open == true) {
+                container2.close()}//cierra el popUp si esta abierto
             alert(`se ha logado ${player.email} ID:${player.uid}`)
             console.log("PLAYER", player);
-            //meter la funcion de cerrar el popUp cuando esté
+            //cambia el menú y muetra la imagen de usuario
+            menuPlayer();
         })
         .catch((error) => {
             let errorCode = error.code;
@@ -366,20 +392,25 @@ const signOutPlayer = () => {
 }
 
 const signUpPlayer = (email, password) => {
+    //const container1 = document.querySelector('#modal-container1');
+    let email1 = email;
+    let password1 = password;
     firebase
         .auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
+        .createUserWithEmailAndPassword(email1, password1)
+        .then(async (userCredential) => {
             let user = userCredential.user;
-            console.log(`se ha registrado ${user.email} ID:${user.uid}`)
-            alert(`se ha registrado ${user.email} con éxito`)
+            console.log(`se ha registrado ${email1} ID:${user.uid}`)
+            alert(`se ha registrado ${email1} con éxito`)
+            await loginPlayer(email1, password1)
             // ...
             // Saves user in firestore
             createPlayer({
                 id: user.uid,
                 email: user.email,
-                imagen: "default",
+                imagen: "gs://proyecto-grupal-quiz.appspot.com/images/yGWbojjZ0ucnertBphwkNtCShcg2.jpg",
             });
+            container1.close()
         })
         .catch((error) => {
             console.log("Error en el sistema" + error.message, "Error: " + error.code);
@@ -393,6 +424,23 @@ const createPlayer = (player) => {
         .set(player)
         .then(() => console.log(`usuario guardado correctamente con id: ${player.email}`))
         .catch((error) => console.error("Error adding document: ", error));
+};
+
+const menuPlayer = ()=>{
+    const btnLogin = document.querySelector('#btnLogin');
+    const btnRegister = document.querySelector('#btnRegistro');
+    const btnContenedor = document.querySelector('#btnContenedor');
+    console.log(btnContenedor);
+    console.log(btnRegister);
+    btnLogin.remove();
+    btnRegister.remove();
+
+    const btnOpciones = document.createElement('button');
+    btnOpciones.classList.add('btnInicio');
+    btnOpciones.value = 'Opciones';
+    btnOpciones.textContent = 'Opciones de usuario';
+
+    btnContenedor.append(btnOpciones)
 };
 
 const uploadFile = ()=> {
@@ -426,6 +474,5 @@ const displayImage = (url)=> {
     imagenPerfil.innerHTML = '';
     imagenPerfil.append(img);
     divImagenFav.style.display= 'none'
-    
 }
 

@@ -9,7 +9,7 @@
     <link href="https://fonts.cdnfonts.com/css/arcade-classic" rel="stylesheet">
 </head>
 
-<body  class="contenedor">
+<body class="contenedor">
     <audio src="music/epic-battle-153400.mp3" type="audio/mp3" autoplay loop></audio>
     <div class="profileImagen"></div>
 
@@ -20,56 +20,55 @@
 
         <div id="btnContenedor">
             <button class="btnInicio" value="play">Iniciar Juego</button>
-            <button class="btnInicio" value="login">Login</button>
-            <button class="btnInicio" value="registro">Registro</button>
+            <button id="btnLogin" class="btnInicio" value="login">Login</button>
+            <button id="btnRegistro" class="btnInicio" value="registro">Registro</button>
             <button class="btnInicio" value="ranking">Ranking</button>
         </div>
     </main>
     <section class="contenedorFormularios">
         <dialog id="modal-container1" class="modal">
-                <h3>Formulario de Registro</h3>
-                <form id="form1" action="#" method="POST">
-                    <div>
-                        <label for="email">Email:</label><br>
-                        <input type="email" id="email" name="email" placeholder="Introduce email..."
-                            autocomplete="on"><br>
-                        <label for="pass">Password:</label><br>
-                        <input type="password" id="pass" name="pass" placeholder="Introduce password..."
-                            autocomplete="on"><br>
-                        <input type="submit" value="Enviar" class="enviar">
-                    </div>
-                </form>
-                <input type="submit" value="x" id="cancelar1" class="cancelar">
+            <h3>Formulario de Registro</h3>
+            <form id="form1" action="#" method="POST">
+                <div>
+                    <label for="email">Email:</label><br>
+                    <input type="email" id="email" name="email" placeholder="Introduce email..." autocomplete="on"><br>
+                    <label for="pass">Password:</label><br>
+                    <input type="password" id="pass" name="pass" placeholder="Introduce password..."
+                        autocomplete="on"><br>
+                    <input type="submit" value="Enviar" class="enviar">
+                </div>
+            </form>
+            <input type="submit" value="x" id="cancelar1" class="cancelar">
         </dialog>
 
         <dialog id="modal-container2" class="modal">
-                <h3>Formulario de Login</h3>
-                <form id="form2" action="#" method="POST">
-                    <div>
-                        <label for="email2">Email:</label><br>
-                        <input type="email" id="email2" name="email2" placeholder="Introduce email..."
-                            autocomplete="on"><br>
-                        <label for="pass3">Password:</label><br>
-                        <input type="password" id="pass3" name="pass3" placeholder="Introduce password..."
-                            autocomplete="on"><br>
-                        <input type="submit" value="Enviar" class="enviar">
-                    </div>
-                </form>
-                <input type="submit" value="x" id="cancelar2" class="cancelar">
+            <h3>Formulario de Login</h3>
+            <form id="form2" action="#" method="POST">
+                <div>
+                    <label for="email2">Email:</label><br>
+                    <input type="email" id="email2" name="email2" placeholder="Introduce email..."
+                        autocomplete="on"><br>
+                    <label for="pass3">Password:</label><br>
+                    <input type="password" id="pass3" name="pass3" placeholder="Introduce password..."
+                        autocomplete="on"><br>
+                    <input type="submit" value="Enviar" class="enviar">
+                </div>
+            </form>
+            <input type="submit" value="x" id="cancelar2" class="cancelar">
         </dialog>
 
-            <dialog id=options class="modal">
-                <h3>OPCIONES</h3>
-                <div id="optionsContainer">
-                    <button class="btnImagen" value="cambiar imagen">Cambiar imagen</button>
-                    <button class="btnBorrarHistorial" value="borrar historial">Borrar historial</button>
-                    <button class="btnsalir" value="salir del perfil">Salir del perfil</button>
-                    <button class="btnBorrarCuenta" value="borrar cuenta">Borrar cuenta</button>
-                    <button class="btnResultados" value="ir  a resultados">Ir a los resultados</button>
-                </div>
-            </dialog>
-
-            <dialog id="modal-container3" class="modal modal-ranking">
+        <dialog id='options' class="modal">
+            <h3>OPCIONES</h3>
+            <div id="optionsContainer">
+                <button class="btnInicio" value="cambiar imagen">Cambiar imagen</button>
+                <button class="btnInicio" value="borrar historial">Borrar historial</button>
+                <button class="btnInicio" value="salir del perfil">Salir del perfil</button>
+                <button class="btnInicio" value="borrar cuenta">Borrar cuenta</button>
+                <button class="btnInicio" value="ir  a resultados">Ir a los resultados</button>
+                <input type="submit" value="x" id="cancelar2" class="cancelar">
+            </div>
+        </dialog>
+                <dialog id="modal-container3" class="modal modal-ranking">
                 <h3>Ranking de mejores Jugadores</h3>
                     <div>
                         
@@ -77,14 +76,18 @@
                 <input type="submit" value="x" id="cancelar1" class="cancelar">
         </dialog>
 
+    <dialog id="subirImagen" class="modal">
+            <div class="subirImagen">
+                <input type="file" id="files">
+                <button id="uploadButton">Subir Imagen</button>
+            </div>
+        </dialog>
     </section>
 
-    <div class="subirImagen">
-        <input type="file" id="files">
-        <button id="uploadButton">Subir Imagen</button>
-    </div>
 
-    
+
+
+
     <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-firestore.js"></script>
     <!--link a la base de datos de firebase-->
@@ -96,4 +99,3 @@
 </body>
 
 </html>
-        
