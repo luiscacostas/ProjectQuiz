@@ -8,9 +8,14 @@ const firebaseConfig = {
   };
 
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
+const auth = firebase.auth();
+
+let provider = new firebase.auth.GoogleAuthProvider();
+
+auth.languajeCode = "es";
 
 const db = firebase.firestore();
-const auth = firebase.auth();
+
 
 let quiz = document.querySelector('.quiz');
 let resultsPage = document.querySelector('.results');
@@ -40,13 +45,18 @@ let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
+
     if (btnOptions) {
         btnOptions.addEventListener('click', (ev)=> {
         if(ev.target.value == 'salir del perfil'){
             console.log("dentro del boton salir")
             signOutPlayer()
-        }
+        } else if (ev.target.value == 'cambiar imagen'){
+            const subirImagen = document.querySelector('#subirImagen')
+            subirImagen.showModal();
+        } 
     }
+        
 )}
     if (btnHome) {
         btnHome.addEventListener('click', (ev) => {
@@ -79,16 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }*/
         });
         getData();
-    }
-
-    if (resultsPage) {
-        resultsPage.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            if (ev.target.tagName === 'BUTTON') {
-                const valueOption = ev.target.value;
-                printResultsPage();
-            }
-        });
     }
 });
 
@@ -217,6 +217,7 @@ const validateResponse = (value, button, timeOut = false) => {
     document.getElementById('siguiente').disabled = false;
 
 };
+
 const disableButtons = () => {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
@@ -468,6 +469,7 @@ const validateInicio = (valueOption) => {
     const popUpOpciones = document.querySelector('#options')
     const container3 = document.querySelector('#modal-container3');
     const cancelarbtn = document.querySelectorAll('.cancelar')
+    const subirImagen = document.querySelector('#subirImagen')
 
     if (valueOption === 'play') {
         console.log('hola');
@@ -491,11 +493,21 @@ const validateInicio = (valueOption) => {
             container2.close()
             popUpOpciones.close()
             container3.close()
+            subirImagen.close()
     })  
 })
 };
 
 // AUTENTICACION
+
+const loginGoogle = async () =>{
+ try {const response = await firebase.auth().signInWithPopup(provider);
+ console.log(response);
+ return response.user;
+ } catch (error){
+    throw new Error(error)
+ }
+};
 
 const loginPlayer = async (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password)
