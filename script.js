@@ -508,17 +508,17 @@ const createPlayer = (player) => {
 };
 
 const deletePlayer = async () => {
-    const user = firebase.auth().currentUser;
-    const userEmail = user.email;
-    db.collection('player').where('email', '==', userEmail).get()
-    .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-            doc.ref.delete(); // Elimina el documento encontrado
-        });
-    })
-    .catch(error => {
-        console.error('Error al buscar y eliminar documento:', error);
-    });
+    try {
+        const user = firebase.auth().currentUser;
+        console.log(user)
+        await user.delete()
+        if (!user) {
+            throw new Error('No user is currently signed in.');
+        }
+        ;
+    } catch (error) {
+
+    }
 }
 
 const menuPlayer = () => {
