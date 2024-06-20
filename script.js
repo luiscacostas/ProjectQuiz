@@ -69,10 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 signOutPlayer()
             } else if (ev.target.value == 'cambiar imagen') {
                 const subirImagen = document.querySelector('#subirImagen')
+                const archivoImagen = document.querySelector('#archivoImagen')
                 subirImagen.showModal();
+                if (archivoImagen.style.display == 'none'){
+                    archivoImagen.style.display = '';
+                }
             } else if (ev.target.value == 'borrar cuenta'){
                 deletePlayer();
-                location.reload();
+                
             }
         }
 
@@ -413,9 +417,13 @@ const validateInicio = (valueOption) => {
 // AUTENTICACION
 
 const loginGoogle = async () => {
+    const user = firebase.auth().currentUser
     try {
         const response = await firebase.auth().signInWithPopup(provider);
         console.log(response);
+        if (user.photoURL) {
+            displayImage(user.photoURL);
+        } else {displayImage()}
         return response.user;
     } catch (error) {
         throw new Error(error)
@@ -423,6 +431,7 @@ const loginGoogle = async () => {
 };
 
 const loginPlayer = async (email, password) => {
+    const user = firebase.auth().currentUser
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const container2 = document.querySelector('#modal-container2');
@@ -435,6 +444,12 @@ const loginPlayer = async (email, password) => {
             alert(`se ha logado ${player.email} ID:${player.uid}`)
             console.log("PLAYER", player);
             //cambia el menú y muetra la imagen de usuario
+            if (user.photoURL) {
+                console.log(user.photoURL)
+                displayImage(user.photoURL);
+            }else {
+                displayImage()
+            };
             menuPlayer();
         })
         .catch((error) => {
@@ -493,12 +508,16 @@ const createPlayer = (player) => {
 
 const deletePlayer = async () => {
     const user = firebase.auth().currentUser;
-    try{
-    await deleteDoc(doc(db, "player", user.uid));
-    await user.delete()
-} catch (error) {
-    alert ("no se ha podido borrar el usuario")
-}
+    const userEmail = user.email;
+    db.collection('player').where('email', '==', userEmail).get()
+    .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+            doc.ref.delete(); // Elimina el documento encontrado
+        });
+    })
+    .catch(error => {
+        console.error('Error al buscar y eliminar documento:', error);
+    });
 }
 
 const menuPlayer = () => {
@@ -544,7 +563,7 @@ const uploadFile = () => {
 }
 document.getElementById("uploadButton").addEventListener("click", uploadFile);
 
-const displayImage = (url) => {
+const displayImage = (url = '../assets/image_defecto.png') => {
     const img = document.createElement('img');
     img.src = url;
     img.classList.add('styleProfile')
