@@ -46,7 +46,7 @@ section{
     filter: brightness(80%);
 }
 
-#siguiente, .btnReturnPlay{
+#siguiente, .btnReturnPlay, .buttonHomeStyle{
     width: 50%;
     align-self: flex-end;
     border: none;

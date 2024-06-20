@@ -128,6 +128,11 @@ const printQuiz = (results, i) => {
     buttonNext.disabled = true;
     quiz.append(buttonNext);
 
+    const buttonHome = document.createElement('BUTTON')
+    buttonHome.textContent = 'Volver al Menu Principal';
+    buttonHome.classList.add('buttonHomeStyle')
+    quiz.append(buttonHome)
+
     const divReloj = document.createElement('DIV')
     const timeSpan = document.createElement('P')
     divReloj.setAttribute('id', 'timer')
@@ -135,6 +140,10 @@ const printQuiz = (results, i) => {
     timeSpan.textContent = 10;
     divReloj.append(timeSpan)
     quiz.append(divReloj)
+
+    buttonHome.addEventListener('click', ()=>{
+        window.location.href = 'home.html';
+    })
 
 };
 
@@ -300,6 +309,7 @@ const printResults = (respuestas) => {
 const validateInicio = (valueOption) => {
     const container1 = document.querySelector('#modal-container1');
     const container2 = document.querySelector('#modal-container2');
+    const container3 = document.querySelector('#modal-container3');
     const cancelarbtn = document.querySelectorAll('.cancelar')
 
     if (valueOption === 'play') {
@@ -311,12 +321,15 @@ const validateInicio = (valueOption) => {
     } else if (valueOption == 'login') {
         console.log('login')
         container2.showModal();
-    } 
+    } else if(valueOption == 'ranking'){
+        container3.showModal()
+    }
 
     cancelarbtn.forEach((btn)=>{
         btn.addEventListener('click',()=>{
             container1.close()
             container2.close()
+            container3.close()
     })  
 })
 };
