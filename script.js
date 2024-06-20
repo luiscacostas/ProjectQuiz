@@ -465,7 +465,7 @@ const uploadFile = ()=> {
         alert("Error al subir imagen o actualizar perfil.");
     });
 }
-document.getElementById("uploadButton").addEventListener("click", uploadFile);
+document.getElementById("changeImage").addEventListener("click", uploadFile);
 
 const displayImage = (url)=> {
     const img = document.createElement('img');
