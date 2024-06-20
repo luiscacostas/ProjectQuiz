@@ -8,11 +8,14 @@ const firebaseConfig = {
   };
 
 firebase.initializeApp(firebaseConfig);// Inicializaar app Firebase
+const auth = firebase.auth();
 
 let provider = new firebase.auth.GoogleAuthProvider();
 
+auth.languajeCode = "es";
+
 const db = firebase.firestore();
-const auth = firebase.auth();
+
 
 let quiz = document.querySelector('.quiz');
 let options = [];
@@ -41,15 +44,18 @@ let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    
+
     if (btnOptions) {
         btnOptions.addEventListener('click', (ev)=> {
         if(ev.target.value == 'salir del perfil'){
             console.log("dentro del boton salir")
             signOutPlayer()
-        }
+        } else if (ev.target.value == 'cambiar imagen'){
+            const subirImagen = document.querySelector('#subirImagen')
+            subirImagen.showModal();
+        } 
     }
+        
 )}
 
 
@@ -85,6 +91,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }*/
         });
         getData();
+    }
+
+    if (container2) {
+        container2.addEventListener('click', async (ev) => {
+            if (ev.target.id === 'btnGoogle') {
+                try{
+                await loginGoogle();
+                menuPlayer();
+                const user = firebase.auth().currentUser
+                console.log(user.uid, user.email)
+                console.log("he cerrado la ventana")
+                console.log(user.uid, user.email)
+                createPlayer({
+                    id: user.uid,
+                    email: user.email,
+                    imagen: "gs://proyecto-grupal-quiz.appspot.com/images/yGWbojjZ0ucnertBphwkNtCShcg2.jpg",
+                });
+                container2.close();
+                console.log("he creado el usuario en la BBDD")
+             } catch (error){}
+            }
+        })
     }
 });
 
@@ -213,12 +241,13 @@ const validateResponse = (value, button, timeOut = false) => {
     document.getElementById('siguiente').disabled = false;
     
 };
+
 const disableButtons = () => {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
         button.disabled = true;
     });
-}
+};
 
 const printResults = (respuestas) => {
     quiz.innerHTML = '';
@@ -331,6 +360,7 @@ const validateInicio = (valueOption) => {
     const popUpOpciones = document.querySelector('#options')
     const container3 = document.querySelector('#modal-container3');
     const cancelarbtn = document.querySelectorAll('.cancelar')
+    const subirImagen = document.querySelector('#subirImagen')
 
     if (valueOption === 'play') {
         console.log('hola');
@@ -354,6 +384,7 @@ const validateInicio = (valueOption) => {
             container2.close()
             popUpOpciones.close()
             container3.close()
+            subirImagen.close()
     })  
 })
 };
@@ -361,30 +392,12 @@ const validateInicio = (valueOption) => {
 // AUTENTICACION
 
 const loginGoogle = async () =>{
-    firebase.auth()
-  .signInWithPopup(provider)
-  .then((result) => {
-    /** @type {firebase.auth.OAuthCredential} */
-    let credential = result.credential;
-
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    let token = credential.accessToken;
-    // The signed-in user info.
-    let user = result.user;
-    // IdP data available in result.additionalUserInfo.profile.
-    alert(`se ha logado ${player.email} ID:${player.uid}`)
-    console.log("PLAYER", player);
-    menuPlayer();
-  }).catch((error) => {
-    // Handle Errors here.
-    let errorCode = error.code;
-    let errorMessage = error.message;
-    // The email of the user's account used.
-    let email = error.email;
-    // The firebase.auth.AuthCredential type that was used.
-    let credential = error.credential;
-    // ...
-  })
+ try {const response = await firebase.auth().signInWithPopup(provider);
+ console.log(response);
+ return response.user;
+ } catch (error){
+    throw new Error(error)
+ }
 };
 
 const loginPlayer = async (email, password) => {
