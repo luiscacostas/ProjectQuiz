@@ -56,6 +56,10 @@ let resultsPage = document.querySelector('.results');
 let contenedorFormularios = document.querySelector('.results_btn')
 let contenedorRanking = document.querySelector('.ranking')
 let topScores = [];
+const audioquiz = document.querySelector('#audioquiz')
+const audioCoin = document.querySelector('#audioCoin')
+const btnGameOver = document.querySelector('#audioGameOver')
+const audioResults = document.querySelector('#audioResults')
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -84,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const archivoImagen = document.querySelector('#archivoImagen')
                 subirImagen.showModal();
                 if (archivoImagen.style.display == 'none') {
-                    archivoImagen.style.display = '';
+                    archivoImagen.style.display = 'block';
                 }
             } else if (ev.target.value == 'borrar cuenta') {
                 deletePlayer();
@@ -247,15 +251,18 @@ function startTimer() {
 }
 
 const validateResponse = (value, button, timeOut = false) => {
+   
     const buttons = document.querySelectorAll('button');
     if (!timeOut) {
         if (value === results[index].correct_answer) {
             button.classList.add('styleOptionActive');
+            audioCoin.play();
             respuestas.push(1);
             clearInterval(timer);
         } else {
             respuestas.push(0);
             button.classList.add('styleOptionInactive');
+            btnGameOver.play();
             clearInterval(timer);
         }
     } else {
@@ -299,6 +306,8 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
 
 const printResults = async (respuestas) => {
+    audioquiz.pause();
+    audioResults.play();
     quiz.innerHTML = '';
     const puntuacion = respuestas.reduce((acc, sum) => acc += sum, 0);
     const divPuntuacion = document.createElement('DIV')
@@ -375,8 +384,13 @@ const printResults = async (respuestas) => {
             logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuaci贸n: ${score.points}</strong>`;
             divScores.append(logScores);
         });
+        const buttonHome = document.createElement('BUTTON')
+        buttonHome.textContent = 'Volver al Menu Principal';
+        buttonHome.classList.add('buttonHomeStyle')
 
-        quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, btnReturnPlay)
+        buttonHome.addEventListener('click', () => {
+            window.location.href = 'home.html';
+        })
 
         btnReturnPlay.addEventListener('click', () => {
             index = 0;
@@ -384,7 +398,9 @@ const printResults = async (respuestas) => {
             score.points = 0;
             getData();
         });
-
+        
+        quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, btnReturnPlay, buttonHome)    
+        
         const data = {
             labels: storedScores.map(resultado => resultado.date),
             series: [storedScores.map(resultado => resultado.points)]
@@ -687,17 +703,20 @@ const createPlayer = (player) => {
 };
 
 const deletePlayer = async () => {
-    const user = firebase.auth().currentUser;
-    const userEmail = user.email;
-    db.collection('player').where('email', '==', userEmail).get()
-        .then(querySnapshot => {
-            querySnapshot.forEach(doc => {
-                doc.ref.delete(); // Elimina el documento encontrado
-            });
-        })
-        .catch(error => {
-            console.error('Error al buscar y eliminar documento:', error);
-        });
+    try {
+        const user = firebase.auth().currentUser;
+        console.log(user)
+        user.delete().then(() => {
+            location.reload()
+          }).catch((error) => {
+            console.log(error)
+          });
+        if (!user) {
+            throw new Error('No user is currently signed in.');
+        }
+        ;
+    } catch (error) {
+    }
 }
 
 const menuPlayer = () => {
@@ -753,7 +772,6 @@ const displayImage = (url = '../assets/image_defecto.png') => {
     img.classList.add('styleProfile')
     imagenPerfil.innerHTML = '';
     imagenPerfil.append(img);
-    divImagenFav.style.display = 'none'
 }
 
 const getTopScores = async () => {
