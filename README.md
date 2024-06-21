@@ -1,4 +1,4 @@
-# ProjectQuiz# Proyecto Quiz
+# Proyecto Quiz
 Este proyecto es una aplicación de quiz que permite a los usuarios registrarse, iniciar sesión y participar en un juego de preguntas y respuestas. La aplicación también almacena y muestra las puntuaciones de los usuarios.
 
 ------------
@@ -274,6 +274,6 @@ El temporizador controla el tiempo de respuesta para cada pregunta. Si el tiempo
 El manejo de errores se realiza principalmente mediante bloques try-catch para capturar y manejar errores en la obtención de datos del API y la autenticación de usuarios.
 
 Autores
-Luis Carlos Acosta - Full Stack.
-Eduardo Fatou - Full Stack.
-Roberto Ruano - Full Stack.
+#Luis Carlos Acosta - Full Stack.
+#Eduardo Fatou - Full Stack.
+#Roberto Ruano - Full Stack.
