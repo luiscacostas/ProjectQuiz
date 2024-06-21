@@ -48,9 +48,15 @@ let timeLeft = 10;
 let timer;
 const container1 = document.querySelector('#modal-container1');
 const container2 = document.querySelector('#modal-container2');
+const container3 = document.querySelector('#modal_ranking')
 let imagenPerfil = document.querySelector('.profileImagen')
 let divImagenFav = document.querySelector('.subirImagen')
 let dialogImagen = document.querySelector('#subirImagen')
+let resultsPage = document.querySelector('.results');
+let contenedorFormularios = document.querySelector('.results_btn')
+let contenedorRanking = document.querySelector('.ranking')
+let topScores = [];
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -61,7 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
             displayImage(user.photoURL || '../assets/image_defecto.png');
         } else {
             console.log("Usuario no está logueado");
-        }})
+        }
+    })
+
+    if (resultsPage) {
+        printResultsPage();
+    }
 
     if (btnOptions) {
         btnOptions.addEventListener('click', (ev) => {
@@ -72,19 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const subirImagen = document.querySelector('#subirImagen')
                 const archivoImagen = document.querySelector('#archivoImagen')
                 subirImagen.showModal();
-                if (archivoImagen.style.display == 'none'){
+                if (archivoImagen.style.display == 'none') {
                     archivoImagen.style.display = '';
                 }
-            } else if (ev.target.value == 'borrar cuenta'){
+            } else if (ev.target.value == 'borrar cuenta') {
                 deletePlayer();
-                
+
             }
         }
 
         )
     }
-
-
     if (btnHome) {
         btnHome.addEventListener('click', (ev) => {
             ev.preventDefault();
@@ -107,14 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 index++;
                 printQuiz(results, index);
                 startTimer()
-            } /*else if (ev.target.classList.contains('cancelar')) {
-                console.log("entro en cancelar")
-                if (container1.open === true){
-                    container1.close();
-                } else if (container2 === false){
-                    container2.close();
-                }
-            }*/
+            }
         });
         getData();
     }
@@ -162,7 +164,6 @@ const getData = async () => {
         if (resp.ok) {
             const data = await resp.json();
             results = data.results;
-            console.log(results);
             printQuiz(results, index);
         } else {
             throw new Error('Error al obtener los datos');
@@ -181,6 +182,7 @@ const printQuiz = (results, i) => {
 
     quiz.innerHTML = '';
     options = shuffle([...results[i].incorrect_answers, results[i].correct_answer]);
+
     const pregunta = document.createElement('H3');
     pregunta.classList.add('styleParrafoPregunta')
     pregunta.textContent = results[i].question;
@@ -275,7 +277,28 @@ const disableButtons = () => {
     });
 };
 
-const printResults = (respuestas) => {
+firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+        try {
+            const playerID = db.collection('player').doc(user.email);
+            const doc = await playerID.get();
+            if (doc.exists) {
+                const playerData = doc.data();
+                console.log('Datos del jugador:', playerData);
+                //localStorage.setItem('playerData', JSON.stringify(playerData));
+            } else {
+                console.log('No se encontró el documento del jugador');
+            }
+        } catch (error) {
+            console.error('Error al obtener datos del jugador:', error);
+        }
+    } else {
+        console.log('Usuario no autenticado');
+    }
+});
+
+
+const printResults = async (respuestas) => {
     quiz.innerHTML = '';
     const puntuacion = respuestas.reduce((acc, sum) => acc += sum, 0);
     const divPuntuacion = document.createElement('DIV')
@@ -292,93 +315,251 @@ const printResults = (respuestas) => {
         date: fecha,
         points: puntuacion
     };
-    scores.push(newScore);
-    localStorage.setItem("scores", JSON.stringify(scores));
-    const storedScores = JSON.parse(localStorage.getItem("scores"));
-    const divChartContainer = document.createElement('DIV')
-    divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
-    const textoChart = document.createElement('P')
-    textoChart.classList.add('textoChart')
-    textoChart.textContent = 'Tus puntuaciones'
-    const btnReturnPlay = document.createElement('BUTTON')
-    btnReturnPlay.textContent = 'Volver a Jugar'
-    btnReturnPlay.classList.add('btnReturnPlay')
-    const divScores = document.createElement('DIV');
-    divScores.classList.add('styleGrafica');
-    storedScores.forEach(score => {
-        const logScores = document.createElement('P');
-        logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
-        divScores.append(logScores);
-    });
 
-    quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, btnReturnPlay)
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const playerID = db.collection('player').doc(user.email);
+                const doc = await playerID.get();
+                if (doc.exists) {
+                    const playerData = doc.data();
+                    await db.collection('scores').add({
+                        uid: playerData.id,
+                        date: newScore.date,
+                        points: newScore.points
+                    });
+                    console.log('Puntuacion guardada en Firestore');
+                } else {
+                    console.log('No se encontro el documento del jugador');
+                }
+            } catch (error) {
+                console.error('Error al guardar en Firestore:', error);
+            }
+        } else {
+            scores.push(newScore);
+            localStorage.setItem("scores", JSON.stringify(scores));
+        }
 
-    btnReturnPlay.addEventListener('click', () => {
-        index = 0;
-        respuestas = [];
-        score.points = 0;
-        getData();
-    });
+        let storedScores;
+        if (user) {
+            try {
+                const playerID = db.collection('player').doc(user.email);
+                const doc = await playerID.get();
+                if (doc.exists) {
+                    const playerData = doc.data();
+                    const querySnapshot = await db.collection('scores').where('uid', '==', playerData.id).get();
+                    storedScores = querySnapshot.docs.map(doc => doc.data());
+                } else {
+                    console.log('No se encontr贸 el documento del jugador');
+                }
+            } catch (error) {
+                console.error('Error al obtener datos de Firestore:', error);
+            }
+        } else {
+            storedScores = JSON.parse(localStorage.getItem("scores")) || [];
+        }
 
-    const data = {
-        labels: scores.map(resultado => resultado.date),
-        series: [scores.map(resultado => resultado.points)]
-    }
-    const options = {
-        showPoint: false,
-        showArea: true,
-        fullWidth: false,
-        chartPadding: {
-            top: 40,
-            right: 20,
-            bottom: 40
-        },
-        axisX: {
-            showGrid: true
-        },
-        axisY: {
-            low: 0,
-            high: 10,
-            onlyInteger: true,
-            referenceValue: 5,
-            showGrid: false
-        }
-    }
-    const chart = new Chartist.Line('.ct-chart', data, options);
-    chart.on('draw', function (context) {
-        if (context.type === 'point') {
-            context.element.attr({
-                style: 'stroke: rgb(255, 87, 199); stroke-width: 12px;'
-            });
-        }
-        if (context.type === 'line') {
-            context.element.attr({
-                style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
-            });
-        }
-        if (context.type === 'area') {
-            context.element.attr({
-                style: 'fill: rgb(255, 0, 170);'
-            });
-        }
-    });
-    chart.on('created', function () {
-        const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
-        axisXLabels.forEach(function (label) {
-            label.style.transform = 'rotate(-45deg) translateX(-40px)';
-            label.style.textAnchor = 'end';
-            label.style.transformOrigin = '0 50%';
+        const divChartContainer = document.createElement('DIV')
+        divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
+        const textoChart = document.createElement('P')
+        textoChart.classList.add('textoChart')
+        textoChart.textContent = 'Tus puntuaciones'
+        const btnReturnPlay = document.createElement('BUTTON')
+        btnReturnPlay.textContent = 'Volver a Jugar'
+        btnReturnPlay.classList.add('btnReturnPlay')
+        btnReturnPlay.setAttribute('value', 'pepito');
+        const divScores = document.createElement('DIV');
+        divScores.classList.add('styleGrafica');
+        storedScores.forEach(score => {
+            const logScores = document.createElement('P');
+            logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuaci贸n: ${score.points}</strong>`;
+            divScores.append(logScores);
         });
-        const linePath = document.querySelector('.ct-series .ct-line');
-        if (linePath) {
-            const length = linePath.getTotalLength();
-            linePath.style.transition = 'none';
-            linePath.style.strokeDasharray = length + ' ' + length;
-            linePath.style.strokeDashoffset = length;
-            linePath.getBoundingClientRect(); // Forzar el reflujo para reiniciar la animación
-            linePath.style.transition = 'stroke-dashoffset 2s ease-out';
-            linePath.style.strokeDashoffset = '0';
+
+        quiz.append(textoResultado, divPuntuacion, textoChart, divChartContainer, btnReturnPlay)
+
+        btnReturnPlay.addEventListener('click', () => {
+            index = 0;
+            respuestas = [];
+            score.points = 0;
+            getData();
+        });
+
+        const data = {
+            labels: storedScores.map(resultado => resultado.date),
+            series: [storedScores.map(resultado => resultado.points)]
         }
+        const options = {
+            showPoint: true,
+            showArea: true,
+            fullWidth: false,
+            chartPadding: {
+                top: 40,
+                right: 20,
+                bottom: 40
+            },
+            axisX: {
+                showGrid: true
+            },
+            axisY: {
+                low: 0,
+                high: 10,
+                onlyInteger: true,
+                referenceValue: 5,
+                showGrid: false
+            }
+        }
+        const chart = new Chartist.Line('.ct-chart', data, options);
+        chart.on('draw', function (context) {
+            if (context.type === 'point') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                });
+            }
+            if (context.type === 'line') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                });
+            }
+            if (context.type === 'area') {
+                context.element.attr({
+                    style: 'fill: rgb(255, 0, 170);'
+                });
+            }
+        });
+        chart.on('created', function () {
+            const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
+            axisXLabels.forEach(function (label) {
+                label.style.transform = 'rotate(-45deg) translateX(-40px)';
+                label.style.textAnchor = 'end';
+                label.style.transformOrigin = '0 50%';
+            });
+            const linePath = document.querySelector('.ct-series .ct-line');
+            if (linePath) {
+                const length = linePath.getTotalLength();
+                linePath.style.transition = 'none';
+                linePath.style.strokeDasharray = length + ' ' + length;
+                linePath.style.strokeDashoffset = length;
+                linePath.getBoundingClientRect();
+                linePath.style.transition = 'stroke-dashoffset 3s ease-out';
+                linePath.style.strokeDashoffset = '0';
+            }
+        });
+    });
+}
+
+const printResultsPage = async () => {
+    const resultsPage = document.querySelector('.results');
+    if (!resultsPage) return;
+
+    let storedScores;
+
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const playerID = db.collection('player').doc(user.email);
+                const doc = await playerID.get();
+                if (doc.exists) {
+                    const playerData = doc.data();
+                    const querySnapshot = await db.collection('scores').where('uid', '==', playerData.id).get();
+                    storedScores = querySnapshot.docs.map(doc => doc.data());
+                } else {
+                    console.log('No se encontró el documento del jugador');
+                }
+            } catch (error) {
+                console.error('Error al obtener datos de Firestore:', error);
+            }
+        } else {
+            storedScores = JSON.parse(localStorage.getItem("scores")) || [];
+        }
+
+        resultsPage.innerHTML = '';
+
+        const divChartContainer = document.createElement('DIV')
+        divChartContainer.classList.add('divChartContainer', 'ct-chart', 'ct-perfect-fourth', 'styleGrafica')
+        const textoChart = document.createElement('P')
+        textoChart.classList.add('textoChart')
+        textoChart.textContent = 'Tus puntuaciones'
+        const divScores = document.createElement('DIV');
+        divScores.classList.add('styleScores');
+        storedScores.forEach(score => {
+            const logScores = document.createElement('P');
+            logScores.innerHTML = `Fecha: ${score.date} - <strong>Puntuación: ${score.points}</strong>`;
+            divScores.append(logScores);
+        });
+
+        resultsPage.append(textoChart, divChartContainer, divScores);
+
+        const data = {
+            labels: storedScores.map(resultado => resultado.date),
+            series: [storedScores.map(resultado => resultado.points)]
+        }
+        const options = {
+            showPoint: true,
+            showArea: true,
+            fullWidth: false,
+            chartPadding: {
+                top: 40,
+                right: 20,
+                bottom: 40
+            },
+            axisX: {
+                showGrid: true
+            },
+            axisY: {
+                low: 0,
+                high: 10,
+                onlyInteger: true,
+                referenceValue: 5,
+                showGrid: false
+            }
+        }
+        const chart = new Chartist.Line('.ct-chart', data, options);
+        chart.on('draw', function (context) {
+            if (context.type === 'point') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                });
+            }
+            if (context.type === 'line') {
+                context.element.attr({
+                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                });
+            }
+            if (context.type === 'area') {
+                context.element.attr({
+                    style: 'fill: rgb(255, 0, 170);'
+                });
+            }
+        });
+        chart.on('created', function () {
+            const axisXLabels = document.querySelectorAll('.ct-label.ct-horizontal');
+            axisXLabels.forEach(function (label) {
+                label.style.transform = 'rotate(-45deg) translateX(-40px)';
+                label.style.textAnchor = 'end';
+                label.style.transformOrigin = '0 50%';
+            });
+            const linePath = document.querySelector('.ct-series .ct-line');
+            if (linePath) {
+                const length = linePath.getTotalLength();
+                linePath.style.transition = 'none';
+                linePath.style.strokeDasharray = length + ' ' + length;
+                linePath.style.strokeDashoffset = length;
+                linePath.getBoundingClientRect();
+                linePath.style.transition = 'stroke-dashoffset 3s ease-out';
+                linePath.style.strokeDashoffset = '0';
+            }
+        });
+        const buttonHome = document.createElement('BUTTON')
+        buttonHome.textContent = 'Volver al Menu Principal';
+        buttonHome.classList.add('buttonHomeStyle')
+        resultsPage.append(buttonHome)
+
+        buttonHome.addEventListener('click', () => {
+            window.location.href = 'home.html';
+        })
+
+
     });
 }
 
@@ -389,14 +570,14 @@ const validateInicio = (valueOption) => {
     const subirImagen = document.querySelector('#subirImagen')
 
     if (valueOption === 'play') {
-        console.log('hola');
         window.location.href = 'questions.html';
     } else if (valueOption == 'registro') {
-        console.log('registro')
         container1.showModal()
     } else if (valueOption == 'login') {
-        console.log('login')
         container2.showModal();
+    } else if (valueOption == 'ranking') {
+        getTopScores()
+        container3.showModal();
     } else if (valueOption == 'Opciones') {
         popUpOpciones.showModal();
     } else if (valueOption == 'salir del perfil') {
@@ -421,10 +602,12 @@ const loginGoogle = async () => {
     const user = firebase.auth().currentUser
     try {
         const response = await firebase.auth().signInWithPopup(provider);
-        console.log(response);
+        container2.close()
         if (user.photoURL) {
             displayImage(user.photoURL);
-        } else {displayImage()}
+
+        } else { displayImage() }
+
         return response.user;
     } catch (error) {
         throw new Error(error)
@@ -448,7 +631,7 @@ const loginPlayer = async (email, password) => {
             if (user.photoURL) {
                 console.log(user.photoURL)
                 displayImage(user.photoURL);
-            }else {
+            } else {
                 displayImage()
             };
             menuPlayer();
@@ -460,7 +643,6 @@ const loginPlayer = async (email, password) => {
             console.log(errorMessage)
 
         });
-
 };
 
 const signOutPlayer = () => {
@@ -484,8 +666,6 @@ const signUpPlayer = (email, password) => {
             console.log(`se ha registrado ${email1} ID:${user.uid}`)
             alert(`se ha registrado ${email1} con éxito`)
             await loginPlayer(email1, password1)
-            // ...
-            // Saves user in firestore
             createPlayer({
                 id: user.uid,
                 email: user.email,
@@ -496,7 +676,6 @@ const signUpPlayer = (email, password) => {
         .catch((error) => {
             console.log("Error en el sistema" + error.message, "Error: " + error.code);
         });
-
 };
 
 const createPlayer = (player) => {
@@ -511,14 +690,14 @@ const deletePlayer = async () => {
     const user = firebase.auth().currentUser;
     const userEmail = user.email;
     db.collection('player').where('email', '==', userEmail).get()
-    .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-            doc.ref.delete(); // Elimina el documento encontrado
+        .then(querySnapshot => {
+            querySnapshot.forEach(doc => {
+                doc.ref.delete(); // Elimina el documento encontrado
+            });
+        })
+        .catch(error => {
+            console.error('Error al buscar y eliminar documento:', error);
         });
-    })
-    .catch(error => {
-        console.error('Error al buscar y eliminar documento:', error);
-    });
 }
 
 const menuPlayer = () => {
@@ -536,10 +715,13 @@ const menuPlayer = () => {
     btnOpciones.textContent = 'Opciones de usuario';
 
     btnContenedor.append(btnOpciones)
+
+    contenedorFormularios.addEventListener('click', () => {
+        window.location.href = 'results.html';
+    })
+
 };
-
-//imagen usuario
-
+//Cargar Imagen de Usuario 
 const uploadFile = () => {
     const file = document.getElementById("files").files[0];
     const user = firebase.auth().currentUser;
@@ -572,4 +754,43 @@ const displayImage = (url = '../assets/image_defecto.png') => {
     imagenPerfil.innerHTML = '';
     imagenPerfil.append(img);
     divImagenFav.style.display = 'none'
+}
+
+const getTopScores = async () => {
+    try {
+        const scoresCollection = db.collection('scores').orderBy('points', 'desc').limit(10);
+        const querySnapshot = await scoresCollection.get();
+
+        topScores = [];
+        querySnapshot.forEach((doc) => {
+            
+            topScores.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        console.log(topScores)
+        pintarRanking(topScores)
+    } catch (error) {
+        console.error('Error al obtener los top scores:', error);
+        throw error;
+    }
+}
+
+const pintarRanking = (topScores)=>{
+    container3.innerHTML = '';
+    topScores.forEach((top)=>{
+        console.log(top.points)
+        const tr = document.createElement('tr')
+        const td_id = document.createElement('td')
+        const td_date = document.createElement('td')
+        const td_score = document.createElement('td')
+        tr.classList.add('styleTabla')
+        td_id.textContent = top.id;
+        td_date.textContent = top.date;
+        td_score.textContent = top.points;
+
+        tr.append(td_id, td_date, td_score)
+        container3.append(tr)
+    })
 }

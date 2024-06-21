@@ -14,6 +14,11 @@ html, body {
     align-items: center;
     justify-content: center;
   }
+  @media (min-width: 768px) {
+      body{
+        background-position: unset;
+      }
+  }
   
 #div-inicio {
     position: absolute; 
@@ -153,7 +158,12 @@ html, body {
     border-radius: 100px;
     margin: 0 auto;
 }
-
+.contenedorFormularios{
+  display: flex;
+}
+.modal-container2{
+  width: auto;
+}
 
 /*Resultado*/
 .firework {
@@ -221,6 +231,8 @@ html, body {
   width: 100px;
   height: 100px;
   display: flex;
+  margin-bottom: 20px;
+  border-radius: 100px;
 }
 
 .modal-ranking{
@@ -235,5 +247,68 @@ html, body {
 }
 .modal-ranking h3{
   font-family: 'ArcadeClassic', sans-serif; 
-  color: yellow;
+  color: rgb(0, 255, 8);
+}
+
+/* Botón de Google */
+.google-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 15px;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  background-color: white;
+  color: #757575;
+  font-family: Roboto, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  width: 40%;
+  margin: 0 auto;
+  display: block;
+  border-radius: 20px;
+}
+
+.google-button:hover {
+  background-color: #f5f5f5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.google-button img {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+}
+
+.styleTabla{
+  color: rgb(236, 248, 7);
+  padding: 10px;
+  margin: 0 auto;
+  display: flex;
+  width: 100%;
+  margin-top: 20px; 
+  border-collapse: separate;
+  border-spacing: 10px 5px; 
+  justify-content: center;
+}
+.styleTabla td{
+  
+  margin:0 10px
+
+}
+#modal_ranking{
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+ 
+}
+@media (min-width:768px ) {
+  .styleTabla td{
+  
+    margin:0 30px;
+    font-size: 30px;
+  }
 }

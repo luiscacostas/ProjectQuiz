@@ -5,8 +5,14 @@ html, body{
 }
 body{
     background-image: url("../assets/istockphoto-1148595387-612x612.jpg");
+    background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+}
+@media (min-width: 768px) {
+    body{
+      background-position: unset;
+    }
 }
 h2, h3{
     margin: 0;
@@ -183,4 +189,18 @@ section{
     font-size: 40px;
     margin-bottom: 20px;
     color: #ff0;  
+}
+
+.styleScores{
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(49, 46, 46);
+    gap: 10px;
+    margin-top: 20px;
+    text-align: center;
+    width: auto;
+    color: white;
+    border-radius: 10px;
+    border-bottom: 10px solid rgb(228, 12, 221);
+    border-top: 10px solid rgb(228, 12, 221)
 }
