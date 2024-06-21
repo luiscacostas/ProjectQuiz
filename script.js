@@ -56,14 +56,13 @@ let resultsPage = document.querySelector('.results');
 let contenedorFormularios = document.querySelector('.results_btn')
 let contenedorRanking = document.querySelector('.ranking')
 let topScores = [];
+const audioMain = document.querySelector('#audioMain')
 const audioquiz = document.querySelector('#audioquiz')
 const audioCoin = document.querySelector('#audioCoin')
 const btnGameOver = document.querySelector('#audioGameOver')
 const audioResults = document.querySelector('#audioResults')
 
-
 document.addEventListener('DOMContentLoaded', () => {
-
     auth.onAuthStateChanged((user) => {
         if (user) {
             console.log("Usuario está logueado:", user.email);
@@ -146,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     }
+    
 });
 
 document.addEventListener('submit', (event) => {
@@ -178,7 +178,7 @@ const getData = async () => {
 }
 
 const printQuiz = (results, i) => {
-    startTimer()
+    startTimer();
     if (index === 10) {
         printResults(respuestas);
         return;
@@ -242,7 +242,9 @@ function startTimer() {
             clearInterval(timer);
             validateResponse(null, null, true);
             disableButtons()
+            btnGameOver.play();
             document.getElementById('time').textContent = 'Tiempo Agotado';
+            
         } else {
             timeLeft--;
             document.getElementById('time').textContent = timeLeft;
