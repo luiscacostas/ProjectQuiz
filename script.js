@@ -604,7 +604,7 @@ const validateInicio = (valueOption) => {
     const subirImagen = document.querySelector('#subirImagen')
 
     if (valueOption === 'play') {
-        window.location.href = 'pages/questions.html';
+        window.location.href = './pages/questions.html';
     } else if (valueOption == 'registro') {
         container1.showModal()
     } else if (valueOption == 'login') {
