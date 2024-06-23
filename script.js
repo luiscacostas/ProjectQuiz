@@ -223,7 +223,7 @@ const printQuiz = (results, i) => {
     quiz.append(divReloj)
 
     buttonHome.addEventListener('click', () => {
-        window.location.href = 'home.html';
+        window.location.href = '../home.html';
     })
 
 };
@@ -391,13 +391,15 @@ const printResults = async (respuestas) => {
         buttonHome.classList.add('buttonHomeStyle')
 
         buttonHome.addEventListener('click', () => {
-            window.location.href = 'home.html';
+            window.location.href = '../home.html';
         })
 
         btnReturnPlay.addEventListener('click', () => {
             index = 0;
             respuestas = [];
             score.points = 0;
+            audioResults.pause();
+            audioquiz.play();
             getData();
         });
         
@@ -417,7 +419,12 @@ const printResults = async (respuestas) => {
                 bottom: 40
             },
             axisX: {
-                showGrid: true
+                showGrid: true,
+                labelInterpolationFnc: function(value, index) {
+                    const totalLabels = data.labels.length;
+                    const step = Math.ceil(totalLabels / 10);
+                    return index % step === 0 ? value : null;
+                }
             },
             axisY: {
                 low: 0,
@@ -436,7 +443,7 @@ const printResults = async (respuestas) => {
             }
             if (context.type === 'line') {
                 context.element.attr({
-                    style: 'stroke: rgb(255, 0, 170); stroke-width: 8px;'
+                    style: 'stroke: rgb(255, 0, 170) stroke-width: 8px;'
                 });
             }
             if (context.type === 'area') {
@@ -451,6 +458,8 @@ const printResults = async (respuestas) => {
                 label.style.transform = 'rotate(-45deg) translateX(-40px)';
                 label.style.textAnchor = 'end';
                 label.style.transformOrigin = '0 50%';
+                label.style.fontSize = '15px'; 
+                label.style.color = '#333';
             });
             const linePath = document.querySelector('.ct-series .ct-line');
             if (linePath) {
@@ -522,7 +531,12 @@ const printResultsPage = async () => {
                 bottom: 40
             },
             axisX: {
-                showGrid: true
+                showGrid: true,
+                labelInterpolationFnc: function(value, index) {
+                    const totalLabels = data.labels.length;
+                    const step = Math.ceil(totalLabels / 10);
+                    return index % step === 0 ? value : null;
+                }
             },
             axisY: {
                 low: 0,
@@ -556,6 +570,8 @@ const printResultsPage = async () => {
                 label.style.transform = 'rotate(-45deg) translateX(-40px)';
                 label.style.textAnchor = 'end';
                 label.style.transformOrigin = '0 50%';
+                label.style.fontSize = '15px'; 
+                label.style.color = '#333';
             });
             const linePath = document.querySelector('.ct-series .ct-line');
             if (linePath) {
@@ -574,7 +590,7 @@ const printResultsPage = async () => {
         resultsPage.append(buttonHome)
 
         buttonHome.addEventListener('click', () => {
-            window.location.href = 'home.html';
+            window.location.href = '../home.html';
         })
 
 
@@ -588,7 +604,7 @@ const validateInicio = (valueOption) => {
     const subirImagen = document.querySelector('#subirImagen')
 
     if (valueOption === 'play') {
-        window.location.href = 'questions.html';
+        window.location.href = 'pages/questions.html';
     } else if (valueOption == 'registro') {
         container1.showModal()
     } else if (valueOption == 'login') {
@@ -738,7 +754,7 @@ const menuPlayer = () => {
     btnContenedor.append(btnOpciones)
 
     contenedorFormularios.addEventListener('click', () => {
-        window.location.href = 'results.html';
+        window.location.href = './pages/results.html';
     })
 
 };
